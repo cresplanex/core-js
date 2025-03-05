@@ -121,19 +121,19 @@ export class ColorValueFactory {
             case ColorTypes.HEX:
                 this._data.hex = data?.hex;
                 data?.hex && (this.hex = data.hex);
-                rgb && (this.rgb = rgb);
-                hsl && (this.hsl = hsl);
+                rgb && (this.rgb = ColorValueFactory.validateRGB(rgb))
+                hsl && (this.hsl = ColorValueFactory.validateHSL(hsl));
                 break;
             case ColorTypes.RGB:
                 this._data.rgb = rgb;
-                rgb && (this.rgb = rgb);
-                hsl && (this.hsl = hsl);
+                rgb && (this.rgb = ColorValueFactory.validateRGB(rgb));
+                hsl && (this.hsl = ColorValueFactory.validateHSL(hsl));
                 data?.hex && (this.hex = data.hex);
                 break;
             case ColorTypes.HSL:
                 this._data.hsl = hsl;
-                rgb && (this.rgb = rgb);
-                hsl && (this.hsl = hsl);
+                rgb && (this.rgb = ColorValueFactory.validateRGB(rgb));
+                hsl && (this.hsl = ColorValueFactory.validateHSL(hsl));
                 data?.hex && (this.hex = data.hex);
                 break;
             case ColorTypes.KEYWORD:
@@ -228,7 +228,7 @@ export class ColorValueFactory {
                 case ColorTypes.HEX:
                     return ColorValueFactory.fromHex(ColorValueFactory.parseHexStr(color), schema);
                 case ColorTypes.RGB:
-                    const match = color.match(/rgba?\(\s*(\d+\.?\d*)\s*,\s*(\d+\.?\d*)\s*,\s*(\d+\.?\d*)\s*(?:,\s*([\d.]+))?\s*\)/);
+                    const match = color.match(/rgba?\(\s*([+-]?\d+\.?\d*)\s*,\s*([+-]?\d+\.?\d*)\s*,\s*([+-]?\d+\.?\d*)\s*(?:,\s*([+-]?[\d.]+))?\s*\)/);
                     if (!match) {
                         throw new Error("Invalid color string");
                     }
@@ -246,7 +246,7 @@ export class ColorValueFactory {
                         b: NumValueFactory.parse(match[3].trim(), { precision: schema?.rgbPrecision || defaultRgbPrecision })
                     }, schema);
                 case ColorTypes.HSL:
-                    const match2 = color.match(/hsla?\(\s*(\d+\.?\d*)\s*,\s*(\d+\.?\d*)%\s*,\s*(\d+\.?\d*)%\s*(?:,\s*([\d.]+))?\s*\)/);
+                    const match2 = color.match(/hsla?\(\s*([+-]?\d+\.?\d*)\s*,\s*([+-]?\d+\.?\d*)%\s*,\s*([+-]?\d+\.?\d*)%\s*(?:,\s*([+-]?[\d.]+))?\s*\)/);
                     if (!match2) {
                         throw new Error("Invalid color string");
                     }
@@ -278,7 +278,7 @@ export class ColorValueFactory {
             return ColorValueFactory.fromHex(ColorValueFactory.parseHexStr(color), schema);
         }
         if (color.startsWith("rgb")) {
-            const match = color.match(/rgba?\(\s*(\d+\.?\d*)\s*,\s*(\d+\.?\d*)\s*,\s*(\d+\.?\d*)\s*(?:,\s*([\d.]+))?\s*\)/);
+            const match = color.match(/rgba?\(\s*([+-]?\d+\.?\d*)\s*,\s*([+-]?\d+\.?\d*)\s*,\s*([+-]?\d+\.?\d*)\s*(?:,\s*([+-]?[\d.]+))?\s*\)/);
             if (!match) {
                 throw new Error("Invalid color string");
             }
@@ -297,7 +297,7 @@ export class ColorValueFactory {
             }, schema);
         }
         if (color.startsWith("hsl")) {
-            const match = color.match(/hsla?\(\s*(\d+\.?\d*)\s*,\s*(\d+\.?\d*)%\s*,\s*(\d+\.?\d*)%\s*(?:,\s*([\d.]+))?\s*\)/);
+            const match = color.match(/hsla?\(\s*([+-]?\d+\.?\d*)\s*,\s*([+-]?\d+\.?\d*)%\s*,\s*([+-]?\d+\.?\d*)%\s*(?:,\s*([+-]?[\d.]+))?\s*\)/);
             if (!match) {
                 throw new Error("Invalid color string");
             }
@@ -712,6 +712,24 @@ export class ColorValueFactory {
         return this._hexCache !== undefined;
     }
 
+    private static validateRGB(rgb: ColorRGBNumData): ColorRGBNumData {
+        return {
+            r: rgb.r.validateWithAdditionalSchema({ min: 0, max: 255, minAlign: true, maxAlign: true }),
+            g: rgb.g.validateWithAdditionalSchema({ min: 0, max: 255, minAlign: true, maxAlign: true }),
+            b: rgb.b.validateWithAdditionalSchema({ min: 0, max: 255, minAlign: true, maxAlign: true }),
+            alpha: rgb.alpha?.validateWithAdditionalSchema({ min: 0, max: 1, minAlign: true, maxAlign: true })
+        };
+    }
+
+    private static validateHSL(hsl: ColorHSLNumData): ColorHSLNumData {
+        return {
+            h: hsl.h.validateWithAdditionalSchema({ min: 0, max: 360, minAlign: true, maxAlign: true }),
+            s: hsl.s.validateWithAdditionalSchema({ min: 0, max: 100, minAlign: true, maxAlign: true }),
+            l: hsl.l.validateWithAdditionalSchema({ min: 0, max: 100, minAlign: true, maxAlign: true }),
+            alpha: hsl.alpha?.validateWithAdditionalSchema({ min: 0, max: 1, minAlign: true, maxAlign: true })
+        };
+    }
+
     toRGB(): ColorRGBData {
         return {
             r: this.rgb.r.toNumber(),
@@ -741,10 +759,10 @@ export class ColorValueFactory {
         if (!this.hasRGB) {
             switch (this._data.type) {
                 case ColorTypes.HEX:
-                    this.rgb = ColorConverter.hexToRgb(this._data.hex as ColorHexData, this._schema);
+                    this.rgb = ColorValueFactory.validateRGB(ColorConverter.hexToRgb(this._data.hex as ColorHexData, this._schema));
                     break;
                 case ColorTypes.HSL:
-                    this.rgb = ColorConverter.hslToRgb(this._data.hsl as ColorHSLNumData, this._schema);
+                    this.rgb = ColorValueFactory.validateRGB(ColorConverter.hslToRgb(this._data.hsl as ColorHSLNumData, this._schema));
                     break;
                 default:
                     throw new Error("Invalid color type");
@@ -761,10 +779,10 @@ export class ColorValueFactory {
         if (!this.hasHSL) {
             switch (this._data.type) {
                 case ColorTypes.HEX:
-                    this.hsl = ColorConverter.hexToHsl(this._data.hex as ColorHexData, this._schema);
+                    this.hsl = ColorValueFactory.validateHSL(ColorConverter.rgbToHsl(ColorConverter.hexToRgb(this._data.hex as ColorHexData, this._schema), this._schema));
                     break;
                 case ColorTypes.RGB:
-                    this.hsl = ColorConverter.rgbToHsl(this._data.rgb as ColorRGBNumData, this._schema);
+                    this.hsl = ColorValueFactory.validateHSL(ColorConverter.rgbToHsl(this._data.rgb as ColorRGBNumData, this._schema));
                     break;
                 default:
                     throw new Error("Invalid color type");

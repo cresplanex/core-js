@@ -153,4 +153,27 @@ describe("NumValueFactory Parse", () => {
     test("parse octal invalid zero zero", () => {
         expect(() => NumValueFactory.parse("0o-")).toThrow("Invalid number value");
     });
+    test("parse with min", () => {
+        expect(() => NumValueFactory.parse("123", { min: 124 })).toThrow("Value is less than min 124");
+    });
+    test("parse with min align", () => {
+        const factory = NumValueFactory.parse("123", { min: 124, minAlign: true });
+        expect(factory.value).toBe(124);
+    });
+    test("parse with max", () => {
+        expect(() => NumValueFactory.parse("123", { max: 122 })).toThrow("Value is greater than max 122");
+    });
+    test("parse with max align", () => {
+        const factory = NumValueFactory.parse("123", { max: 122, maxAlign: true });
+        expect(factory.value).toBe(122);
+    });
+    test("parse with infinity error", () => {
+        expect(() => NumValueFactory.parse("Infinity", { isInfError: true })).toThrow("Infinity value is not allowed");
+    });
+    test("parse with nan error", () => {
+        expect(() => NumValueFactory.parse("NaN", { isNanError: true })).toThrow("NaN value is not allowed");
+    });
+    test("parse with zero error", () => {
+        expect(() => NumValueFactory.parse("0", { isZeroError: true })).toThrow("Zero value is not allowed");
+    });
 });

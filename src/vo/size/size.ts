@@ -145,22 +145,22 @@ export class SizeValueFactory {
             return new SizeValueFactory({ value: 0, unit: KeywordSizeTypes.AUTO}, schema);
         }
 
-        const cmRegex = /^(\d*\.?\d*)cm$/;
-        const mmRegex = /^(\d*\.?\d*)mm$/;
-        const quarterMillimeterRegex = /^(\d*\.?\d*)Q$/;
-        const inchRegex = /^(\d*\.?\d*)in$/;
-        const pointRegex = /^(\d*\.?\d*)pt$/;
-        const picaRegex = /^(\d*\.?\d*)pc$/;
-        const pixelRegex = /^(\d*\.?\d*)px$/;
-        const percentageRegex = /^(\d*\.?\d*)%$/;
-        const emRegex = /^(\d*\.?\d*)em$/;
-        const exRegex = /^(\d*\.?\d*)ex$/;
-        const chRegex = /^(\d*\.?\d*)ch$/;
-        const remRegex = /^(\d*\.?\d*)rem$/;
-        const vwRegex = /^(\d*\.?\d*)vw$/;
-        const vhRegex = /^(\d*\.?\d*)vh$/;
-        const vminRegex = /^(\d*\.?\d*)vmin$/;
-        const vmaxRegex = /^(\d*\.?\d*)vmax$/;
+        const cmRegex = /^([+-]?\d*\.?\d*)cm$/
+        const mmRegex = /^([+-]?\d*\.?\d*)mm$/;
+        const quarterMillimeterRegex = /^([+-]?\d*\.?\d*)Q$/;
+        const inchRegex = /^([+-]?\d*\.?\d*)in$/;
+        const pointRegex = /^([+-]?\d*\.?\d*)pt$/;
+        const picaRegex = /^([+-]?\d*\.?\d*)pc$/;
+        const pixelRegex = /^([+-]?\d*\.?\d*)px$/;
+        const percentageRegex = /^([+-]?\d*\.?\d*)%$/;
+        const emRegex = /^([+-]?\d*\.?\d*)em$/;
+        const exRegex = /^([+-]?\d*\.?\d*)ex$/;
+        const chRegex = /^([+-]?\d*\.?\d*)ch$/;
+        const remRegex = /^([+-]?\d*\.?\d*)rem$/;
+        const vwRegex = /^([+-]?\d*\.?\d*)vw$/;
+        const vhRegex = /^([+-]?\d*\.?\d*)vh$/;
+        const vminRegex = /^([+-]?\d*\.?\d*)vmin$/;
+        const vmaxRegex = /^([+-]?\d*\.?\d*)vmax$/;
 
         if (type) {
             switch (type) {

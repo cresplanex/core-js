@@ -1,4 +1,5 @@
 import { NumRounding } from "./round";
+import { NumValue } from "./value";
 
 export interface NumSchema {
     precision?: number;
@@ -6,6 +7,11 @@ export interface NumSchema {
     epsilon?: number;
     maxE?: number;
     minE?: number;
-    min?: number;
-    max?: number;
+    min?: NumValue;
+    minAlign?: boolean;
+    max?: NumValue;
+    maxAlign?: boolean;
+    isNanError?: boolean;
+    isZeroError?: boolean;
+    isInfError?: boolean;
 }

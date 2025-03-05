@@ -227,4 +227,33 @@ describe("ColorValueFactory", () => {
             rgb: { r: 129, g: 127, b: 127, alpha: 0.76 }
         })).toBe(true);
     });
+
+    test("color validate rgb auto fix", () => {
+        const factory = ColorValueFactory.parse(
+            "rgba(280, 280, 280, 1.1)",
+        );
+        expect(factory.toString()).toBe("rgba(255, 255, 255, 1)");
+
+        const factory2 = ColorValueFactory.parse(
+            "rgba(-10, -10, -10, -0.1)",
+        );
+        expect(factory2.toString()).toBe("rgba(0, 0, 0, 0)");
+    });
+
+    test("color validate hsl auto fix", () => {
+        const factory = ColorValueFactory.parse(
+            "hsla(120, 120%, 120%, 1.1)",
+        );
+        expect(factory.toString()).toBe("hsla(120, 100%, 100%, 1)");
+
+        const factory2 = ColorValueFactory.parse(
+            "hsla(-120, -120%, -120%, -0.1)",
+        );
+        expect(factory2.toString()).toBe("hsla(0, 0%, 0%, 0)");
+
+        const factory3 = ColorValueFactory.parse(
+            "hsla(+120, +120%, -120%, -.5)",
+        );
+        expect(factory3.toString()).toBe("hsla(120, 100%, 0%, 0)");
+    });
 });

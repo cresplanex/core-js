@@ -1,5 +1,5 @@
 import Decimal from "decimal.js";
-import { defaultEpsilon, defaultMaxE, defaultMinE, defaultNumRounding, fixedPrecision } from "./const";
+import { defaultEpsilon, defaultMax, defaultMaxE, defaultMin, defaultMinE, defaultNumRounding, fixedPrecision } from "./const";
 import { NumSchema } from "./schema";
 import { NumValue } from "./value";
 import { NumRounding, roundingToDecimal } from "./round";
@@ -14,6 +14,13 @@ export class NumValueFactory {
     private _rounding: NumRounding;
     private _innerData: innerNumValue;
     private _decimalConstructor: Decimal.Constructor;
+    private _min: NumValue;
+    private _minAlign: boolean;
+    private _max: NumValue;
+    private _maxAlign: boolean;
+    private _isNanError: boolean;
+    private _isZeroError: boolean;
+    private _isInfError: boolean;
 
     static LN10_STRING = '2.3025850929940456840179914546843642076011014886287729760333279009675726096773524802359972050895982983419677840422862486334095254650828067566662873690987816894829072083255546808437998948262331985283935053089653777326288461633662222876982198867465436674744042432743651550489343149393914796194044002221051017141748003688084012647080685567743216228355220114804663715659121373450747856947683463616792101806445070648000277502684916746550586856935673420670581136429224554405758925724208241314695689016758940256776311356919292033376587141660230105703089634572075440370847469940168269282808481184289314848524948644871927809676271275775397027668605952496716674183485704422507197965004714951050492214776567636938662976979522110718264549734772662425709429322582798502585509785265383207606726317164309505995087807523710333101197857547331541421808427543863591778117054309827482385045648019095610299291824318237525357709750539565187697510374970888692180205189339507238539205144634197265287286965110862571492198849978748873771345686209167058';
     static PI_STRING = '3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249534301465495853710507922796892589235420199561121290219608640344181598136297747713099605187072113499999983729780499510597317328160963185950244594553469083026425223082533446850352619311881710100031378387528865875332083814206171776691473035982534904287554687311595628638823537875937519577818577805321712268066130019278766111959092164201989380952572010654858632789';
@@ -29,6 +36,13 @@ export class NumValueFactory {
         this._epsilon = schema?.epsilon ?? defaultEpsilon;
         this._maxE = schema?.maxE ?? defaultMaxE;
         this._minE = schema?.minE ?? defaultMinE;
+        this._max = schema?.max ?? defaultMax;
+        this._maxAlign = schema?.maxAlign ?? false;
+        this._min = schema?.min ?? defaultMin;
+        this._minAlign = schema?.minAlign ?? false;
+        this._isNanError = schema?.isNanError ?? false;
+        this._isZeroError = schema?.isZeroError ?? false;
+        this._isInfError = schema?.isInfError ?? false;
         this._decimalConstructor = Decimal.clone({ 
             precision: this._precision, 
             rounding: roundingToDecimal(this._rounding),
@@ -46,6 +60,8 @@ export class NumValueFactory {
             return;
         }
         this._innerData = data instanceof Decimal ? data : new this._decimalConstructor(data).add(0);
+
+        this.validate();
     }
 
     private static schemaToDecimal(schema?: NumSchema): Decimal.Constructor {
@@ -57,18 +73,15 @@ export class NumValueFactory {
         });
     }
 
-    // validate(): boolean {
-    //     return this._innerData.isFinite();
-    // }
-
     static parse(value: string, schema?: NumSchema): NumValueFactory {
+        let numVal: Decimal;
         try {
             const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-            let numVal = new Decimal_(value).add(0);
-            return new NumValueFactory(numVal, schema);
+            numVal = new Decimal_(value).add(0);
         } catch (e) {
             throw new Error("Invalid number value");
         }
+        return new NumValueFactory(numVal, schema);
     }
 
     static PI(schema?: NumSchema): NumValueFactory {
@@ -141,6 +154,65 @@ export class NumValueFactory {
 
     setSchema(schema: NumSchema): NumValueFactory {
         return new NumValueFactory(this._innerData, schema);
+    }
+
+    addSchema(schema: NumSchema): NumValueFactory {
+        return new NumValueFactory(this._innerData, { ...this.schema, ...schema });
+    }
+
+    onlyAddSchema(schema: NumSchema): NumValueFactory {
+        this.schema = { ...this.schema, ...schema };
+        return this;
+    }
+
+    validate(): NumValueFactory {
+        if (this._isNanError && this._innerData.isNaN()) {
+            throw new Error("NaN value is not allowed");
+        } else if (this._isZeroError && this._innerData.isZero()) {
+            throw new Error("Zero value is not allowed");
+        } else if (this._isInfError && !this._innerData.isFinite()) {
+            throw new Error("Infinity value is not allowed");
+        } else if (!this._innerData.isNaN() && this._innerData.isFinite()) {
+            if (this._innerData.lessThanOrEqualTo(this._min)) {
+                if (this._minAlign) {
+                    this._innerData = new this._decimalConstructor(this._min);
+                } else {
+                    throw new Error(`Value is less than min ${this._min}`);
+                }
+            } else if (this._innerData.greaterThanOrEqualTo(this._max)) {
+                if (this._maxAlign) {
+                    this._innerData = new this._decimalConstructor(this._max);
+                } else {
+                    throw new Error(`Value is greater than max ${this._max}`);
+                }
+            }
+        }
+        return this;
+    }
+
+    validateWithAdditionalSchema(schema: NumSchema): NumValueFactory {
+        if (schema.isNanError && this._innerData.isNaN()) {
+            throw new Error("NaN value is not allowed");
+        } else if (schema.isZeroError && this._innerData.isZero()) {
+            throw new Error("Zero value is not allowed");
+        } else if (schema.isInfError && !this._innerData.isFinite()) {
+            throw new Error("Infinity value is not allowed");
+        } else if (!this._innerData.isNaN() && this._innerData.isFinite()) {
+            if (this._innerData.lessThanOrEqualTo(schema.min ?? defaultMin)) {
+                if (schema.minAlign) {
+                    this._innerData = new this._decimalConstructor(schema.min ?? defaultMin);
+                } else {
+                    throw new Error(`Value is less than min ${schema.min ?? defaultMin}`);
+                }
+            } else if (this._innerData.greaterThanOrEqualTo(schema.max ?? defaultMax)) {
+                if (schema.maxAlign) {
+                    this._innerData = new this._decimalConstructor(schema.max ?? defaultMax);
+                } else {
+                    throw new Error(`Value is greater than max ${schema.max ?? defaultMax}`);
+                }
+            }
+        }
+        return this;
     }
 
     cbrt(): NumValueFactory {

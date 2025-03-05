@@ -38,7 +38,7 @@ export class ColorConverter {
         }
         h = h.mul(60);
         return {
-            h: h,
+            h,
             s: s.mul(100),
             l: l.mul(100),
             alpha: rgb.alpha,
@@ -129,7 +129,7 @@ export class ColorConverter {
         const r = NumValueFactory.parse(rStr).setSchema({ precision: schema?.rgbPrecision });
         const g = NumValueFactory.parse(gStr).setSchema({ precision: schema?.rgbPrecision });
         const b = NumValueFactory.parse(bStr).setSchema({ precision: schema?.rgbPrecision });
-        const a = NumValueFactory.parse(`0x${alpha}`).div(255);
+        const a = NumValueFactory.parse(`0x${alpha}`).div(255).setSchema({ precision: schema?.alphaPrecision });
         return {
             r,
             g,

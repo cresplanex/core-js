@@ -41,11 +41,9 @@ export class ColorStyler {
         if (!(hsl.l instanceof NumValueFactory)) {
             hsl.l = new NumValueFactory(hsl.l, { precision: schema?.hslLightnessPrecision });
         }
-        console.log(hsl.h.toString(), hsl.s.toString(), hsl.l.toString(), alpha?.toString(), lightnessRate.toString());
         return { 
             h: hsl.h, 
             s: optionSaturation === undefined ? hsl.s : optionSaturation,
-            // l: lightnessIsLight ? hsl.l + (100 - hsl.l) * lightness.rate : hsl.l - hsl.l * lightness.rate,
             l: lightnessIsLight ? hsl.l.neg().add(100).mul(lightnessRate).add(hsl.l) : hsl.l.mul(lightnessRate).neg().add(hsl.l),
             alpha: optionAlpha || alpha,
         };

@@ -29,11 +29,6 @@ function equalsRGBColor(
     }
     const aAlpha = a.alpha || new NumValueFactory(1, { precision: schema?.alphaPrecision });
 
-    // return Math.abs(a.r - b.r) <= tolerance 
-    // && Math.abs(a.g - b.g) <= tolerance 
-    // && Math.abs(a.b - b.b) <= tolerance 
-    // && Math.abs((a.alpha || 1) - (b.alpha || 1)) <= (options.alphaTolerance || 0);
-
     return a.r.sub(b.r).abs().lte(tolerance)
     && a.g.sub(b.g).abs().lte(tolerance)
     && a.b.sub(b.b).abs().lte(tolerance)
@@ -73,11 +68,6 @@ function equalsHSLColor(
     && a.s.sub(b.s).abs().lte(saturationTolerance)
     && a.l.sub(b.l).abs().lte(lightnessTolerance)
     && aAlpha.sub(b.alpha || 1).abs().lte(alphaTolerance);
-
-    // return Math.abs(a.h - b.h) <= (options.hueTolerance || 0)
-    // && Math.abs(a.s - b.s) <= (options.saturationTolerance || 0)
-    // && Math.abs(a.l - b.l) <= (options.lightnessTolerance || 0)
-    // && Math.abs((a.alpha || 1) - (b.alpha || 1)) <= (options.alphaTolerance || 0);
 }
 
 function equalsHexColor(

@@ -231,4 +231,15 @@ describe("SizeValueFactory", () => {
             value: "16.500000000000000000000000000001"
         })).toBe(true);
     });
+
+    test("test with sign", () => {
+        const factory = SizeValueFactory.parse("+16.5cm", undefined, {pixelPrecision: 100});
+        expect(factory.cm.value).toBe(16.5);
+        const factory2 = SizeValueFactory.parse("-16.5cm", undefined, {pixelPrecision: 100});
+        expect(factory2.cm.value).toBe(-16.5);
+
+        const factory3 = SizeValueFactory.parse("-16.5px", undefined, {pixelPrecision: 100, context});
+        expect(factory3.pixel.value).toBe(-16.5);
+        expect(factory3.percentage.value).toBe(-8.25);
+    });
 });
