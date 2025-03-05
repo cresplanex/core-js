@@ -1,29 +1,30 @@
-import { toStringPrecision } from "./schema";
+import { NumRoundings, toStringOptions } from "../number";
 import { ColorHexData, ColorHSLData, ColorRGBData } from "./types";
 
-export const defaultRgbPrecision = 4;
-export const defaultHslHuePrecision = 4;
-export const defaultHslSaturationPrecision = 4;
-export const defaultHslLightnessPrecision = 4;
-export const defaultAlphaPrecision = 4;
-export const defaultRgbToStringPrecision: toStringPrecision  = { type: "auto", precision: 0 };
-export const defaultHslHueToStringPrecision: toStringPrecision  = { type: "auto", precision: 0 };
-export const defaultHslSaturationToStringPrecision: toStringPrecision  = { type: "auto", precision: 0 };
-export const defaultHslLightnessToStringPrecision: toStringPrecision  = { type: "auto", precision: 0 };
-export const defaultAlphaToStringPrecision: toStringPrecision  = { type: "auto", precision: 0 };
+export const defaultRgbPrecision = { precision: 4, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultHslHuePrecision = { precision: 4, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultHslSaturationPrecision = { precision: 4, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultHslLightnessPrecision = { precision: 4, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultAlphaPrecision = { precision: 4, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultRgbToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultHslHueToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultHslSaturationToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultHslLightnessToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultAlphaToStringPrecision: toStringOptions = { type: "auto" };
 
-export const defaultRgbTolerancePrecision = 20;
-export const defaultAlphaTolerancePrecision = 20;
-export const defaultHslHueTolerancePrecision = 20;
-export const defaultHslSaturationTolerancePrecision = 20;
-export const defaultHslLightnessTolerancePrecision = 20;
+export const defaultRgbTolerancePrecision = { precision:20, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultAlphaTolerancePrecision = { precision:20, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultHslHueTolerancePrecision = { precision:20, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultHslSaturationTolerancePrecision = { precision:20, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultHslLightnessTolerancePrecision = { precision:20, rounding: NumRoundings.ROUND_HALF_UP };
 
-export const defaultRgbRatePrecision = 20;
-export const defaultHslHueRatePrecision = 20;
-export const defaultHslSaturationRatePrecision = 20;
-export const defaultHslLightnessRatePrecision = 20;
+export const defaultRgbRatePrecision = { precision:20, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultHslHueRatePrecision = { precision:20, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultHslSaturationRatePrecision = { precision:20, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultHslLightnessRatePrecision = { precision:20, rounding: NumRoundings.ROUND_HALF_UP };
 export const defaultLightnessIsLight = false;
 export const defaultHslLightnessRate = 0;
+export const defaultConvertExtraPrecision = 10;
 
 export const ColorKeywords = {
   ALICEBLUE: "aliceblue",

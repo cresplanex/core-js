@@ -2,6 +2,7 @@ import { ColorHSLData, AttachColorOptions, ColorHSLNumData } from "./types";
 import { defaultLightnessIsLight, defaultHslLightnessRate } from "./const";
 import { NumValueFactory } from "../number";
 import { ColorSchema } from "./schema";
+import { ColorValueFactory } from "./color";
 
 export class ColorStyler {
     static attachHSLStyle(
@@ -12,34 +13,34 @@ export class ColorStyler {
         const lightnessIsLight = hslOptions.lightness?.isLight || defaultLightnessIsLight;
         let lightnessRate = hslOptions.lightness?.rate || defaultHslLightnessRate;
         if (!(lightnessRate instanceof NumValueFactory)) {
-            lightnessRate = new NumValueFactory(lightnessRate, { precision: schema?.hslLightnessRatePrecision });
+            lightnessRate = new NumValueFactory(lightnessRate, { ...ColorValueFactory.makeNumValueSchema("lightnessRate", schema) });
         }
         let optionSaturation: NumValueFactory|undefined;
         if (hslOptions.saturation instanceof NumValueFactory) {
             optionSaturation = hslOptions.saturation;
         } else if (hslOptions.saturation !== undefined) {
-            optionSaturation = new NumValueFactory(hslOptions.saturation, { precision: schema?.hslSaturationPrecision });
+            optionSaturation = new NumValueFactory(hslOptions.saturation, { ...ColorValueFactory.makeNumValueSchema("saturationRate", schema) });
         }
         let optionAlpha: NumValueFactory|undefined;
         if (hslOptions.alpha instanceof NumValueFactory) {
             optionAlpha = hslOptions.alpha;
         } else if (hslOptions.alpha !== undefined) {
-            optionAlpha = new NumValueFactory(hslOptions.alpha, { precision: schema?.alphaPrecision });
+            optionAlpha = new NumValueFactory(hslOptions.alpha, { ...ColorValueFactory.makeNumValueSchema("alpha", schema) });
         }
         let alpha: NumValueFactory|undefined;
         if (hsl.alpha instanceof NumValueFactory) {
             alpha = hsl.alpha;
         } else if (hsl.alpha !== undefined) {
-            alpha = new NumValueFactory(hsl.alpha, { precision: schema?.alphaPrecision });
+            alpha = new NumValueFactory(hsl.alpha, { ...ColorValueFactory.makeNumValueSchema("alpha", schema) });
         }
         if (!(hsl.h instanceof NumValueFactory)) {
-            hsl.h = new NumValueFactory(hsl.h, { precision: schema?.hslHuePrecision });
+            hsl.h = new NumValueFactory(hsl.h, { ...ColorValueFactory.makeNumValueSchema("hue", schema) });
         }
         if (!(hsl.s instanceof NumValueFactory)) {
-            hsl.s = new NumValueFactory(hsl.s, { precision: schema?.hslSaturationPrecision });
+            hsl.s = new NumValueFactory(hsl.s, { ...ColorValueFactory.makeNumValueSchema("saturation", schema) });
         }
         if (!(hsl.l instanceof NumValueFactory)) {
-            hsl.l = new NumValueFactory(hsl.l, { precision: schema?.hslLightnessPrecision });
+            hsl.l = new NumValueFactory(hsl.l, { ...ColorValueFactory.makeNumValueSchema("lightness", schema) });
         }
         return { 
             h: hsl.h, 

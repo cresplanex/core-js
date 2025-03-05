@@ -24,7 +24,7 @@ export type ColorRGBData = {
 };
 
 export function isColorRGBNumData(data: ColorRGBData|ColorRGBNumData): data is ColorRGBNumData {
-    return (data as ColorRGBNumData).r instanceof NumValueFactory;
+    return data.r instanceof NumValueFactory;
 }
 
 export type ColorRGBNumData = {

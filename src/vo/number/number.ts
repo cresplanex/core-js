@@ -30,8 +30,8 @@ export class NumValueFactory {
         return new NumValueFactory(data, schema);
     }
 
-    constructor(data: NumValue|Decimal|'LN10'|'PI'|'E', private schema?: NumSchema) {
-        this._precision = schema?.precision ?? fixedPrecision;   
+    constructor(data: NumValue|Decimal|'LN10'|'PI'|'E', private schema?: NumSchema, useAsIs: boolean = false) {
+        this._precision = schema?.precision ?? fixedPrecision;  
         this._rounding = schema?.rounding ?? defaultNumRounding;
         this._epsilon = schema?.epsilon ?? defaultEpsilon;
         this._maxE = schema?.maxE ?? defaultMaxE;
@@ -59,7 +59,7 @@ export class NumValueFactory {
             this._innerData = new this._decimalConstructor(NumValueFactory.E_STRING).add(0);
             return;
         }
-        this._innerData = data instanceof Decimal ? data : new this._decimalConstructor(data).add(0);
+        this._innerData = (data instanceof Decimal && useAsIs) ? data : new this._decimalConstructor(data).add(0);
 
         this.validate();
     }
@@ -81,34 +81,34 @@ export class NumValueFactory {
         } catch (e) {
             throw new Error("Invalid number value");
         }
-        return new NumValueFactory(numVal, schema);
+        return new NumValueFactory(numVal, schema, true);
     }
 
     static PI(schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(new Decimal_(NumValueFactory.PI_STRING).add(0), schema);
+        return new NumValueFactory(new Decimal_(NumValueFactory.PI_STRING).add(0), schema, true);
     }
 
     static E(schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(new Decimal_(NumValueFactory.E_STRING).add(0), schema);
+        return new NumValueFactory(new Decimal_(NumValueFactory.E_STRING).add(0), schema, true);
     }
 
     static LN10(schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(new Decimal_(NumValueFactory.LN10_STRING).add(0), schema);
+        return new NumValueFactory(new Decimal_(NumValueFactory.LN10_STRING).add(0), schema, true);
     }
 
     static ZERO(schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(new Decimal_(0), schema);
+        return new NumValueFactory(new Decimal_(0), schema, true);
     }
 
     get value(): NumValue {
         return this._innerData.toNumber();
     }
 
-    set value(value: number) {
+    set value(value: NumValue) {
         this._innerData = new this._decimalConstructor(value);
     }
 
@@ -117,39 +117,39 @@ export class NumValueFactory {
     }
 
     add(value: number|string|NumValue|NumValueFactory): NumValueFactory {
-        return new NumValueFactory(this._innerData.add(NumValueFactory.convertType(value)), this.schema);
+        return new NumValueFactory(this._innerData.add(NumValueFactory.convertType(value)), this.schema, true);
     }
 
     static add(value1: number|string|NumValue|NumValueFactory, value2: number|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.add(NumValueFactory.convertType(value1), NumValueFactory.convertType(value2)), schema);
+        return new NumValueFactory(Decimal_.add(NumValueFactory.convertType(value1), NumValueFactory.convertType(value2)), schema, true);
     }
 
     sub(value: number|string|NumValue|NumValueFactory): NumValueFactory {
-        return new NumValueFactory(this._innerData.sub(NumValueFactory.convertType(value)), this.schema);
+        return new NumValueFactory(this._innerData.sub(NumValueFactory.convertType(value)), this.schema, true);
     }
 
     static sub(value1: number|string|NumValue|NumValueFactory, value2: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.sub(NumValueFactory.convertType(value1), NumValueFactory.convertType(value2)), schema);
+        return new NumValueFactory(Decimal_.sub(NumValueFactory.convertType(value1), NumValueFactory.convertType(value2)), schema, true);
     }
 
     mul(value: number|string|NumValue|NumValueFactory): NumValueFactory {
-        return new NumValueFactory(this._innerData.mul(NumValueFactory.convertType(value)), this.schema);
+        return new NumValueFactory(this._innerData.mul(NumValueFactory.convertType(value)), this.schema, true);
     }
 
     static mul(value1: number|string|NumValue|NumValueFactory, value2: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.mul(NumValueFactory.convertType(value1), NumValueFactory.convertType(value2)), schema);
+        return new NumValueFactory(Decimal_.mul(NumValueFactory.convertType(value1), NumValueFactory.convertType(value2)), schema, true);
     }
 
     div(value: number|string|NumValue|NumValueFactory): NumValueFactory {
-        return new NumValueFactory(this._innerData.div(NumValueFactory.convertType(value)), this.schema);
+        return new NumValueFactory(this._innerData.div(NumValueFactory.convertType(value)), this.schema, true);
     }
 
     static div(value1: number|string|NumValue|NumValueFactory, value2: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.div(NumValueFactory.convertType(value1), NumValueFactory.convertType(value2)), schema);
+        return new NumValueFactory(Decimal_.div(NumValueFactory.convertType(value1), NumValueFactory.convertType(value2)), schema, true);
     }
 
     setSchema(schema: NumSchema): NumValueFactory {
@@ -158,11 +158,6 @@ export class NumValueFactory {
 
     addSchema(schema: NumSchema): NumValueFactory {
         return new NumValueFactory(this._innerData, { ...this.schema, ...schema });
-    }
-
-    onlyAddSchema(schema: NumSchema): NumValueFactory {
-        this.schema = { ...this.schema, ...schema };
-        return this;
     }
 
     validate(): NumValueFactory {
@@ -191,6 +186,7 @@ export class NumValueFactory {
     }
 
     validateWithAdditionalSchema(schema: NumSchema): NumValueFactory {
+        schema = { ...this.schema, ...schema };
         if (schema.isNanError && this._innerData.isNaN()) {
             throw new Error("NaN value is not allowed");
         } else if (schema.isZeroError && this._innerData.isZero()) {
@@ -216,47 +212,47 @@ export class NumValueFactory {
     }
 
     cbrt(): NumValueFactory {
-        return new NumValueFactory(this._innerData.cbrt(), this.schema);
+        return new NumValueFactory(this._innerData.cbrt(), this.schema, true);
     }
 
     divToInt(value: number|string|NumValue|NumValueFactory): NumValueFactory {
-        return new NumValueFactory(this._innerData.divToInt(NumValueFactory.convertType(value)), this.schema);
+        return new NumValueFactory(this._innerData.divToInt(NumValueFactory.convertType(value)), this.schema, true);
     }
 
     mod(n: number|string|NumValue|NumValueFactory): NumValueFactory {
-        return new NumValueFactory(this._innerData.mod(NumValueFactory.convertType(n)), this.schema);
+        return new NumValueFactory(this._innerData.mod(NumValueFactory.convertType(n)), this.schema, true);
     }
 
     static mod(value: number|string|NumValue|NumValueFactory, n: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.mod(NumValueFactory.convertType(value), NumValueFactory.convertType(n)), schema);
+        return new NumValueFactory(Decimal_.mod(NumValueFactory.convertType(value), NumValueFactory.convertType(n)), schema, true);
     }
 
     log(n?: number|string|NumValue|NumValueFactory): NumValueFactory {
-        return new NumValueFactory(this._innerData.log(n !== undefined ? NumValueFactory.convertType(n) : undefined), this.schema);
+        return new NumValueFactory(this._innerData.log(n !== undefined ? NumValueFactory.convertType(n) : undefined), this.schema, true);
     }
 
     static log(value: number|string|NumValue|NumValueFactory, n?: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.log(NumValueFactory.convertType(value), n !== undefined ? NumValueFactory.convertType(n) : undefined), schema);
+        return new NumValueFactory(Decimal_.log(NumValueFactory.convertType(value), n !== undefined ? NumValueFactory.convertType(n) : undefined), schema, true);
     }
 
     ln(): NumValueFactory {
-        return new NumValueFactory(this._innerData.ln(), this.schema);
+        return new NumValueFactory(this._innerData.ln(), this.schema, true);
     }
 
     static ln(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.ln(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.ln(NumValueFactory.convertType(value)), schema, true);
     }
 
     exp(): NumValueFactory {
-        return new NumValueFactory(this._innerData.exp(), this.schema);
+        return new NumValueFactory(this._innerData.exp(), this.schema, true);
     }
 
     static exp(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.exp(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.exp(NumValueFactory.convertType(value)), schema, true);
     }
 
     decimalPlaces(): number {
@@ -268,116 +264,116 @@ export class NumValueFactory {
     }
 
     cos(): NumValueFactory {
-        return new NumValueFactory(this._innerData.cos(), this.schema);
+        return new NumValueFactory(this._innerData.cos(), this.schema, true);
     }
 
     static cos(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.cos(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.cos(NumValueFactory.convertType(value)), schema, true);
     }
 
     sin(): NumValueFactory {
-        return new NumValueFactory(this._innerData.sin(), this.schema);
+        return new NumValueFactory(this._innerData.sin(), this.schema, true);
     }
 
     static sin(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.sin(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.sin(NumValueFactory.convertType(value)), schema, true);
     }
 
     tan(): NumValueFactory {
-        return new NumValueFactory(this._innerData.tan(), this.schema);
+        return new NumValueFactory(this._innerData.tan(), this.schema, true);
     }
 
     static tan(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.tan(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.tan(NumValueFactory.convertType(value)), schema, true);
     }
 
     acos(): NumValueFactory {
-        return new NumValueFactory(this._innerData.acos(), this.schema);
+        return new NumValueFactory(this._innerData.acos(), this.schema, true);
     }
 
     static acos(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.acos(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.acos(NumValueFactory.convertType(value)), schema, true);
     }
 
     asin(): NumValueFactory {
-        return new NumValueFactory(this._innerData.asin(), this.schema);
+        return new NumValueFactory(this._innerData.asin(), this.schema, true);
     }
 
     static asin(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.asin(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.asin(NumValueFactory.convertType(value)), schema, true);
     }
 
     atan(): NumValueFactory {
-        return new NumValueFactory(this._innerData.atan(), this.schema);
+        return new NumValueFactory(this._innerData.atan(), this.schema, true);
     }
 
     static atan(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.atan(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.atan(NumValueFactory.convertType(value)), schema, true);
     }
 
     static atan2(y: number|string|NumValue|NumValueFactory, x: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.atan2(NumValueFactory.convertType(y), NumValueFactory.convertType(x)), schema);
+        return new NumValueFactory(Decimal_.atan2(NumValueFactory.convertType(y), NumValueFactory.convertType(x)), schema, true);
     }
 
     cosh(): NumValueFactory {
-        return new NumValueFactory(this._innerData.cosh(), this.schema);
+        return new NumValueFactory(this._innerData.cosh(), this.schema, true);
     }
 
     static cosh(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.cosh(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.cosh(NumValueFactory.convertType(value)), schema, true);
     }
 
     sinh(): NumValueFactory {
-        return new NumValueFactory(this._innerData.sinh(), this.schema);
+        return new NumValueFactory(this._innerData.sinh(), this.schema, true);
     }
 
     static sinh(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.sinh(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.sinh(NumValueFactory.convertType(value)), schema, true);
     }
 
     tanh(): NumValueFactory {
-        return new NumValueFactory(this._innerData.tanh(), this.schema);
+        return new NumValueFactory(this._innerData.tanh(), this.schema, true);
     }
 
     static tanh(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.tanh(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.tanh(NumValueFactory.convertType(value)), schema, true);
     }
 
     acosh(): NumValueFactory {
-        return new NumValueFactory(this._innerData.acosh(), this.schema);
+        return new NumValueFactory(this._innerData.acosh(), this.schema, true);
     }
 
     static acosh(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.acosh(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.acosh(NumValueFactory.convertType(value)), schema, true);
     }
 
     asinh(): NumValueFactory {
-        return new NumValueFactory(this._innerData.asinh(), this.schema);
+        return new NumValueFactory(this._innerData.asinh(), this.schema, true);
     }
 
     static asinh(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.asinh(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.asinh(NumValueFactory.convertType(value)), schema, true);
     }
 
     atanh(): NumValueFactory {
-        return new NumValueFactory(this._innerData.atanh(), this.schema);
+        return new NumValueFactory(this._innerData.atanh(), this.schema, true);
     }
 
     static atanh(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.atanh(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.atanh(NumValueFactory.convertType(value)), schema, true);
     }
 
     isFinite(): boolean {
@@ -411,95 +407,95 @@ export class NumValueFactory {
     }
 
     pow(exponent: number|string|NumValue|NumValueFactory): NumValueFactory {
-        return new NumValueFactory(this._innerData.pow(NumValueFactory.convertType(exponent)), this.schema);
+        return new NumValueFactory(this._innerData.pow(NumValueFactory.convertType(exponent)), this.schema, true);
     }
 
     static pow(base: number|string|NumValue|NumValueFactory, exponent: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.pow(NumValueFactory.convertType(base), NumValueFactory.convertType(exponent)), schema);
+        return new NumValueFactory(Decimal_.pow(NumValueFactory.convertType(base), NumValueFactory.convertType(exponent)), schema, true);
     }
 
     sqrt(): NumValueFactory {
-        return new NumValueFactory(this._innerData.sqrt(), this.schema);
+        return new NumValueFactory(this._innerData.sqrt(), this.schema, true);
     }
 
     static sqrt(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.sqrt(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.sqrt(NumValueFactory.convertType(value)), schema, true);
     }
 
     abs(): NumValueFactory {
-        return new NumValueFactory(this._innerData.abs(), this.schema);
+        return new NumValueFactory(this._innerData.abs(), this.schema, true);
     }
 
     static abs(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.abs(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.abs(NumValueFactory.convertType(value)), schema, true);
     }
 
     ceil(): NumValueFactory {
-        return new NumValueFactory(this._innerData.ceil(), this.schema);
+        return new NumValueFactory(this._innerData.ceil(), this.schema, true);
     }
 
     static ceil(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.ceil(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.ceil(NumValueFactory.convertType(value)), schema, true);
     }
 
     floor(): NumValueFactory {
-        return new NumValueFactory(this._innerData.floor(), this.schema);
+        return new NumValueFactory(this._innerData.floor(), this.schema, true);
     }
 
     static floor(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.floor(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.floor(NumValueFactory.convertType(value)), schema, true);
     }
 
     round(): NumValueFactory {
-        return new NumValueFactory(this._innerData.round(), this.schema);
+        return new NumValueFactory(this._innerData.round(), this.schema, true);
     }
 
     static round(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.round(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.round(NumValueFactory.convertType(value)), schema, true);
     }
 
     clamp(min: number|string|NumValue|NumValueFactory, max: number|string|NumValue|NumValueFactory): NumValueFactory {
-        return new NumValueFactory(this._innerData.clamp(NumValueFactory.convertType(min), NumValueFactory.convertType(max)), this.schema);
+        return new NumValueFactory(this._innerData.clamp(NumValueFactory.convertType(min), NumValueFactory.convertType(max)), this.schema, true);
     }
 
     static clamp(value: number|string|NumValue|NumValueFactory, min: number|string|NumValue|NumValueFactory, max: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.clamp(NumValueFactory.convertType(value), NumValueFactory.convertType(min), NumValueFactory.convertType(max)), schema);
+        return new NumValueFactory(Decimal_.clamp(NumValueFactory.convertType(value), NumValueFactory.convertType(min), NumValueFactory.convertType(max)), schema, true);
     }
 
     neg(): NumValueFactory {
-        return new NumValueFactory(this._innerData.neg(), this.schema);
+        return new NumValueFactory(this._innerData.neg(), this.schema, true);
     }
 
     trunc(): NumValueFactory {
-        return new NumValueFactory(this._innerData.trunc(), this.schema);
+        return new NumValueFactory(this._innerData.trunc(), this.schema, true);
     }
 
     static trunc(value: number|string|NumValue|NumValueFactory, schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.trunc(NumValueFactory.convertType(value)), schema);
+        return new NumValueFactory(Decimal_.trunc(NumValueFactory.convertType(value)), schema, true);
     }
 
     toDecimalPlaces(decimalPlaces: number): NumValueFactory {
-        return new NumValueFactory(this._innerData.toDecimalPlaces(decimalPlaces), this.schema);
+        return new NumValueFactory(this._innerData.toDecimalPlaces(decimalPlaces), this.schema, true);
     }
 
     toFraction(maxDenominator?: number): NumValueFactory[] {
-        return this._innerData.toFraction(maxDenominator).map((value) => new NumValueFactory(value, this.schema));
+        return this._innerData.toFraction(maxDenominator).map((value) => new NumValueFactory(value, this.schema, true));
     }
 
     toNearest(near: number|string|NumValue|NumValueFactory, rounding?: NumRounding): NumValueFactory {
-        return new NumValueFactory(this._innerData.toNearest(NumValueFactory.convertType(near), roundingToDecimal(rounding)), this.schema);
+        return new NumValueFactory(this._innerData.toNearest(NumValueFactory.convertType(near), roundingToDecimal(rounding)), this.schema, true);
     }
 
     toSignificantDigits(significantDigits?: number): NumValueFactory {
-        return new NumValueFactory(this._innerData.toSignificantDigits(significantDigits), this.schema);
+        return new NumValueFactory(this._innerData.toSignificantDigits(significantDigits), this.schema, true);
     }
 
     toBinary(significantDigits?: number): string {
@@ -571,7 +567,7 @@ export class NumValueFactory {
 
     static max(values: (number|string|NumValue|NumValueFactory)[], schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.max(...values.map((value) => NumValueFactory.convertType(value))), schema);
+        return new NumValueFactory(Decimal_.max(...values.map((value) => NumValueFactory.convertType(value))), schema, true);
     }
 
     max(...values: (number|string|NumValue|NumValueFactory)[]): NumValueFactory {
@@ -580,7 +576,7 @@ export class NumValueFactory {
 
     static min(values: (number|string|NumValue|NumValueFactory)[], schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.min(...values.map((value) => NumValueFactory.convertType(value))), schema);
+        return new NumValueFactory(Decimal_.min(...values.map((value) => NumValueFactory.convertType(value))), schema, true);
     }
 
     min(...values: (number|string|NumValue|NumValueFactory)[]): NumValueFactory {
@@ -589,11 +585,11 @@ export class NumValueFactory {
 
     static random(schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.random(), schema);
+        return new NumValueFactory(Decimal_.random(), schema, true);
     }
 
     static sum(values: (number|string|NumValue|NumValueFactory)[], schema?: NumSchema): NumValueFactory {
         const Decimal_ = NumValueFactory.schemaToDecimal(schema);
-        return new NumValueFactory(Decimal_.sum(...values.map((value) => NumValueFactory.convertType(value))), schema);
+        return new NumValueFactory(Decimal_.sum(...values.map((value) => NumValueFactory.convertType(value))), schema, true);
     }
 }

@@ -297,13 +297,18 @@ export class SizeConverter {
     }
 
     static convertSizeValue(
-        base: NumValue, 
+        base: NumValue|NumValueFactory, 
         from: SizeType, 
         to: SizeType, 
         context: SizeConversionContext = {},
         numSchema?: NumSchema,
     ): NumValueFactory {
-        const factory = NumValueFactory.create(base, numSchema);
+        let factory: NumValueFactory;
+        if (base instanceof NumValueFactory) {
+            factory = base;
+        } else {
+            factory = NumValueFactory.create(base, numSchema);
+        }
         
         if (this.isAbsoluteUnit(from) && this.isAbsoluteUnit(to)) {
             return this.convertAbsolute(factory, from, to, numSchema);

@@ -1,21 +1,39 @@
+import { NumRoundings, toStringOptions } from "../number";
 import { SizeConversionContext } from "./schema";
 
-export const cmFixedPrecision = 3;
-export const mmFixedPrecision = 3;
-export const quarterMillimeterFixedPrecision = 3;
-export const inchFixedPrecision = 3;
-export const pointFixedPrecision = 3;
-export const picaFixedPrecision = 3;
-export const pixelFixedPrecision = 3;
-export const percentageFixedPrecision = 3;
-export const emFixedPrecision = 3;
-export const exFixedPrecision = 3;
-export const chFixedPrecision = 3;
-export const remFixedPrecision = 3;
-export const vwFixedPrecision = 3;
-export const vhFixedPrecision = 3;
-export const vminFixedPrecision = 3;
-export const vmaxFixedPrecision = 3;
+export const defaultCMPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultMMPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultQuarterMillimeterPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultInchPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultPointPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultPicaPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultPixelPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultPercentagePrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultEmPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultExPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultChPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultRemPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultVwPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultVhPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultVminPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+export const defaultVmaxPrecision = { precision: 3, rounding: NumRoundings.ROUND_HALF_UP };
+
+export const defaultCMToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultMMToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultQuarterMillimeterToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultInchToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultPointToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultPicaToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultPixelToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultPercentageToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultEmToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultExToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultChToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultRemToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultVWToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultVHToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultVMinToStringPrecision: toStringOptions = { type: "auto" };
+export const defaultVMaxToStringPrecision: toStringOptions = { type: "auto" };
 
 export const defaultSizeContext: SizeConversionContext = {}
 export const defaultSizeEqualsOptions = { 
@@ -37,3 +55,4 @@ export const defaultSizeEqualsOptions = {
     vminTolerance: 0,
     vmaxTolerance: 0,
 } as const;
+export const defaultConvertExtraPrecision = 10;

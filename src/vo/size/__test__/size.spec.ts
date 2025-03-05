@@ -1,5 +1,4 @@
-import Decimal from "decimal.js";
-import { NumValueFactory } from "../../number";
+import { NumRoundings, NumValueFactory } from "../../number";
 import { SizeValueFactory } from "../size";
 import { AbsoluteSizeTypes } from "../types";
 
@@ -63,7 +62,7 @@ describe("SizeValueFactory", () => {
     });
 
     test("fromString with pc value", () => {
-        const factory = SizeValueFactory.parse("1pc", undefined, {cmPrecision: 2, mmPrecision: 3});
+        const factory = SizeValueFactory.parse("1pc", undefined, {cmOptions: {precision: 2}, mmOptions: {precision: 3}});
         expect(factory.cm.value).toBe(0.42)
         expect(factory.mm.value).toBe(4.23);
     });
@@ -152,25 +151,29 @@ describe("SizeValueFactory", () => {
     });
 
     test("precision test", () => {
-        const factory_auto = SizeValueFactory.parse("1.234cm", undefined, {cmPrecision: 4, mmPrecision: 4});
+        const factory_auto = SizeValueFactory.parse("1.234cm", undefined, {cmOptions: {precision: 4}, mmOptions: {precision: 4}});
         expect(factory_auto.cm.value).toBeCloseTo(1.234);
         expect(factory_auto.mm.value).toBeCloseTo(12.34);
 
-        const factory_0_auto = SizeValueFactory.parse("1.234cm", undefined, {cmPrecision: 1, mmPrecision: 4});
+        const factory_0_auto = SizeValueFactory.parse("1.234cm", undefined, {cmOptions: {precision: 1}, mmOptions: {precision: 4}});
         expect(factory_0_auto.cm.value).toBeCloseTo(1);
         expect(factory_0_auto.mm.value).toBeCloseTo(10);
 
-        const factory_1_auto = SizeValueFactory.parse("1.234cm", undefined, {cmPrecision: 2, mmPrecision: 4});
+        const factory_1_auto = SizeValueFactory.parse("1.234cm", undefined, {cmOptions: {precision: 2}, mmOptions: {precision: 4}});
         expect(factory_1_auto.cm.value).toBeCloseTo(1.2);
         expect(factory_1_auto.mm.value).toBeCloseTo(12);
 
-        const factory_2_auto = SizeValueFactory.parse("1.234cm", undefined, {cmPrecision: 3, mmPrecision: 4});
+        const factory_2_auto = SizeValueFactory.parse("1.234cm", undefined, {cmOptions: {precision: 3}, mmOptions: {precision: 4}});
         expect(factory_2_auto.cm.value).toBeCloseTo(1.23);
         expect(factory_2_auto.mm.value).toBeCloseTo(12.3);
 
-        const factory_3_0 = SizeValueFactory.parse("1.234cm", undefined, {cmPrecision: 4, mmPrecision: 2});
+        const factory_3_0 = SizeValueFactory.parse("1.234cm", undefined, {cmOptions: {precision: 4}, mmOptions: {precision: 2}});
         expect(factory_3_0.cm.value).toBeCloseTo(1.234);
         expect(factory_3_0.mm.value).toBeCloseTo(12);
+
+        const factory_3_1 = SizeValueFactory.parse("1.234cm", undefined, {cmOptions: {precision: 4}, mmOptions: {precision: 3, rounding: NumRoundings.ROUND_UP}});
+        expect(factory_3_1.cm.value).toBeCloseTo(1.234);
+        expect(factory_3_1.mm.value).toBeCloseTo(12.4);
     });
 
     test("no support unit", () => {
@@ -185,7 +188,7 @@ describe("SizeValueFactory", () => {
     });
 
     test("equal test", () => {
-        const factory = SizeValueFactory.parse("16.5px", undefined, {pixelPrecision: 100});
+        const factory = SizeValueFactory.parse("16.5px", undefined, {pixelOptions: {precision: 100}});
         expect(factory.equals({
             unit: AbsoluteSizeTypes.PIXEL,
             value: 16.5
@@ -233,12 +236,12 @@ describe("SizeValueFactory", () => {
     });
 
     test("test with sign", () => {
-        const factory = SizeValueFactory.parse("+16.5cm", undefined, {pixelPrecision: 100});
+        const factory = SizeValueFactory.parse("+16.5cm", undefined);
         expect(factory.cm.value).toBe(16.5);
-        const factory2 = SizeValueFactory.parse("-16.5cm", undefined, {pixelPrecision: 100});
+        const factory2 = SizeValueFactory.parse("-16.5cm", undefined);
         expect(factory2.cm.value).toBe(-16.5);
 
-        const factory3 = SizeValueFactory.parse("-16.5px", undefined, {pixelPrecision: 100, context});
+        const factory3 = SizeValueFactory.parse("-16.5px", undefined, {context});
         expect(factory3.pixel.value).toBe(-16.5);
         expect(factory3.percentage.value).toBe(-8.25);
     });

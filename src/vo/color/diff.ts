@@ -21,13 +21,13 @@ function equalsRGBColor(
 ): boolean {
     let tolerance = options.tolerance || 0;
     if (!(tolerance instanceof NumValueFactory)) {
-        tolerance = new NumValueFactory(tolerance, { precision: schema?.rgbTolerancePrecision });
+        tolerance = new NumValueFactory(tolerance, { ...ColorValueFactory.makeNumValueSchema("rgbTolerance", schema) });
     }
     let alphaTolerance = options.alphaTolerance || 0;
     if (!(alphaTolerance instanceof NumValueFactory)) {
-        alphaTolerance = new NumValueFactory(alphaTolerance, { precision: schema?.alphaTolerancePrecision });
+        alphaTolerance = new NumValueFactory(alphaTolerance, { ...ColorValueFactory.makeNumValueSchema("alphaTolerance", schema) });
     }
-    const aAlpha = a.alpha || new NumValueFactory(1, { precision: schema?.alphaPrecision });
+    const aAlpha = a.alpha || new NumValueFactory(1, { ...ColorValueFactory.makeNumValueSchema("alpha", schema) });
 
     return a.r.sub(b.r).abs().lte(tolerance)
     && a.g.sub(b.g).abs().lte(tolerance)
@@ -48,21 +48,21 @@ function equalsHSLColor(
 ): boolean {
     let hueTolerance = options.hueTolerance || 0;
     if (!(hueTolerance instanceof NumValueFactory)) {
-        hueTolerance = new NumValueFactory(hueTolerance, { precision: schema?.hueTolerancePrecision });
+        hueTolerance = new NumValueFactory(hueTolerance, { ...ColorValueFactory.makeNumValueSchema("hueTolerance", schema) });
     }
     let saturationTolerance = options.saturationTolerance || 0;
     if (!(saturationTolerance instanceof NumValueFactory)) {
-        saturationTolerance = new NumValueFactory(saturationTolerance, { precision: schema?.saturationTolerancePrecision });
+        saturationTolerance = new NumValueFactory(saturationTolerance, { ...ColorValueFactory.makeNumValueSchema("saturationTolerance", schema) });
     }
     let lightnessTolerance = options.lightnessTolerance || 0;
     if (!(lightnessTolerance instanceof NumValueFactory)) {
-        lightnessTolerance = new NumValueFactory(lightnessTolerance, { precision: schema?.lightnessTolerancePrecision });
+        lightnessTolerance = new NumValueFactory(lightnessTolerance, { ...ColorValueFactory.makeNumValueSchema("lightnessTolerance", schema) });
     }
     let alphaTolerance = options.alphaTolerance || 0;
     if (!(alphaTolerance instanceof NumValueFactory)) {
-        alphaTolerance = new NumValueFactory(alphaTolerance, { precision: schema?.alphaTolerancePrecision });
+        alphaTolerance = new NumValueFactory(alphaTolerance, { ...ColorValueFactory.makeNumValueSchema("alphaTolerance", schema) });
     }
-    const aAlpha = a.alpha || new NumValueFactory(1, { precision: schema?.alphaPrecision });
+    const aAlpha = a.alpha || new NumValueFactory(1, { ...ColorValueFactory.makeNumValueSchema("alpha", schema) });
 
     return a.h.sub(b.h).abs().lte(hueTolerance)
     && a.s.sub(b.s).abs().lte(saturationTolerance)

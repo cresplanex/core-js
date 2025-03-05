@@ -1,28 +1,46 @@
-import { NumValueFactory, NumSchema } from "../number";
+import { NumValueFactory, NumSchema, NumValue, toStringOptions, numberOptions } from "../number";
+import { precisionForConvert } from "../number/round";
 import { 
-    chFixedPrecision, 
-    cmFixedPrecision, 
-    defaultSizeContext, 
-    emFixedPrecision, 
-    exFixedPrecision, 
-    inchFixedPrecision, 
-    mmFixedPrecision, 
-    percentageFixedPrecision, 
-    picaFixedPrecision, 
-    pixelFixedPrecision, 
-    pointFixedPrecision, 
-    quarterMillimeterFixedPrecision, 
-    remFixedPrecision, 
-    vhFixedPrecision, 
-    vmaxFixedPrecision, 
-    vminFixedPrecision, 
-    vwFixedPrecision 
+    defaultChPrecision, 
+    defaultCMPrecision, 
+    defaultChToStringPrecision, 
+    defaultCMToStringPrecision, 
+    defaultEmToStringPrecision, 
+    defaultExToStringPrecision, 
+    defaultInchToStringPrecision, 
+    defaultMMToStringPrecision, 
+    defaultPercentageToStringPrecision, 
+    defaultPicaToStringPrecision, 
+    defaultPixelToStringPrecision, 
+    defaultPointToStringPrecision, 
+    defaultQuarterMillimeterToStringPrecision, 
+    defaultRemToStringPrecision, 
+    defaultSizeContext,  
+    defaultVHToStringPrecision,  
+    defaultVMaxToStringPrecision,  
+    defaultVMinToStringPrecision,  
+    defaultVWToStringPrecision,  
+    defaultEmPrecision, 
+    defaultExPrecision, 
+    defaultInchPrecision, 
+    defaultMMPrecision, 
+    defaultPercentagePrecision, 
+    defaultPicaPrecision, 
+    defaultPixelPrecision, 
+    defaultPointPrecision, 
+    defaultQuarterMillimeterPrecision, 
+    defaultRemPrecision, 
+    defaultVhPrecision, 
+    defaultVmaxPrecision, 
+    defaultVminPrecision, 
+    defaultVwPrecision, 
+    defaultConvertExtraPrecision
 } from "./const";
 import { SizeConverter } from "./convert";
 import { equalsSize } from "./diff";
 import { FilledSizeSchema, SizeEqualOptions, SizeSchema } from "./schema";
 import { AbsoluteSizeTypes, KeywordSizeTypes, RelativeSizeTypes, SizeType } from "./types";
-import { SizeValue } from "./value";
+import { isSizeNumValue, SizeNumValue, SizeValue } from "./value";
 
 export class SizeValueFactory {
     private _data: SizeValue;
@@ -45,28 +63,7 @@ export class SizeValueFactory {
     private _vmaxCache: NumValueFactory|undefined;
 
     private _schema: FilledSizeSchema;
-
-    // private _cmPrecision: number;
-    // private _mmPrecision: number;
-    // private _quarterMillimeterPrecision: number;
-    // private _inchPrecision: number;
-    // private _pointPrecision: number;
-    // private _picaPrecision: number; 
-    // private _pixelPrecision: number;
-    // private _percentagePrecision: number;
-    // private _emPrecision: number;
-    // private _exPrecision: number;
-    // private _chPrecision: number;
-    // private _remPrecision: number;
-    // private _vwPrecision: number;
-    // private _vhPrecision: number;
-    // private _vminPrecision: number; 
-    // private _vmaxPrecision: number;
-
-    // equalOptions?: SizeEqualOptions;
     auto: boolean = false;
-
-    // private _context: SizeConversionContext;
 
     static create(data: SizeValue, schema?: SizeSchema) {
         return new SizeValueFactory(data, schema);
@@ -75,69 +72,146 @@ export class SizeValueFactory {
     constructor(data: SizeValue, schema?: SizeSchema) {
         this._data = data;
         this._schema = {
-            cmPrecision: schema?.cmPrecision ?? cmFixedPrecision,
-            mmPrecision: schema?.mmPrecision ?? mmFixedPrecision,
-            quarterMillimeterPrecision: schema?.quarterMillimeterPrecision ?? quarterMillimeterFixedPrecision,
-            inchPrecision: schema?.inchPrecision ?? inchFixedPrecision,
-            pointPrecision: schema?.pointPrecision ?? pointFixedPrecision,
-            picaPrecision: schema?.picaPrecision ?? picaFixedPrecision,
-            pixelPrecision: schema?.pixelPrecision ?? pixelFixedPrecision,
-            percentagePrecision: schema?.percentagePrecision ?? percentageFixedPrecision,
-            emPrecision: schema?.emPrecision ?? emFixedPrecision,
-            exPrecision: schema?.exPrecision ?? exFixedPrecision,
-            chPrecision: schema?.chPrecision ?? chFixedPrecision,
-            remPrecision: schema?.remPrecision ?? remFixedPrecision,
-            vwPrecision: schema?.vwPrecision ?? vwFixedPrecision,
-            vhPrecision: schema?.vhPrecision ?? vhFixedPrecision,
-            vminPrecision: schema?.vminPrecision ?? vminFixedPrecision,
-            vmaxPrecision: schema?.vmaxPrecision ?? vmaxFixedPrecision,
+            cmOptions: schema?.cmOptions ?? defaultCMPrecision,
+            mmOptions: schema?.mmOptions ?? defaultMMPrecision,
+            quarterMillimeterOptions: schema?.quarterMillimeterOptions ?? defaultQuarterMillimeterPrecision,
+            inchOptions: schema?.inchOptions ?? defaultInchPrecision,
+            pointOptions: schema?.pointOptions ?? defaultPointPrecision,
+            picaOptions: schema?.picaOptions ?? defaultPicaPrecision,
+            pixelOptions: schema?.pixelOptions ?? defaultPixelPrecision,
+            percentageOptions: schema?.percentageOptions ?? defaultPercentagePrecision,
+            emOptions: schema?.emOptions ?? defaultEmPrecision,
+            exOptions: schema?.exOptions ?? defaultExPrecision,
+            chOptions: schema?.chOptions ?? defaultChPrecision,
+            remOptions: schema?.remOptions ?? defaultRemPrecision,
+            vwOptions: schema?.vwOptions ?? defaultVwPrecision,
+            vhOptions: schema?.vhOptions ?? defaultVhPrecision,
+            vminOptions: schema?.vminOptions ?? defaultVminPrecision,
+            vmaxOptions: schema?.vmaxOptions ?? defaultVmaxPrecision,
             context: schema?.context || defaultSizeContext,
             noMatchSupportUnit: schema?.noMatchSupportUnit || "throw",
-            equalOptions: schema?.equalOptions || { base: (this.unit !== "auto" ? this.unit : "px") }
+            equalOptions: schema?.equalOptions || { base: (this.unit !== "auto" ? this.unit : "px") },
+            cmToStringOptions: schema?.cmToStringOptions || defaultCMToStringPrecision,
+            mmToStringOptions: schema?.mmToStringOptions || defaultMMToStringPrecision,
+            quarterMillimeterToStringOptions: schema?.quarterMillimeterToStringOptions || defaultQuarterMillimeterToStringPrecision,
+            inchToStringOptions: schema?.inchToStringOptions || defaultInchToStringPrecision,
+            pointToStringOptions: schema?.pointToStringOptions || defaultPointToStringPrecision,
+            picaToStringOptions: schema?.picaToStringOptions || defaultPicaToStringPrecision,
+            pixelToStringOptions: schema?.pixelToStringOptions || defaultPixelToStringPrecision,    
+            percentageToStringOptions: schema?.percentageToStringOptions || defaultPercentageToStringPrecision,
+            emToStringOptions: schema?.emToStringOptions || defaultEmToStringPrecision,
+            exToStringOptions: schema?.exToStringOptions || defaultExToStringPrecision,
+            chToStringOptions: schema?.chToStringOptions || defaultChToStringPrecision,
+            remToStringOptions: schema?.remToStringOptions || defaultRemToStringPrecision,
+            vwToStringOptions: schema?.vwToStringOptions || defaultVWToStringPrecision,
+            vhToStringOptions: schema?.vhToStringOptions || defaultVHToStringPrecision,
+            vminToStringOptions: schema?.vminToStringOptions || defaultVMinToStringPrecision,
+            vmaxToStringOptions: schema?.vmaxToStringOptions || defaultVMaxToStringPrecision,
+            convertExtraPrecision: schema?.convertExtraPrecision || defaultConvertExtraPrecision,
         }
         this._naturalValue = NumValueFactory.create(data.value, this.makeNumValueSchema(data.unit));
         this.storeValue(this._naturalValue, data.unit);
     }
 
-    private makeNumValueSchema(unit: SizeType): NumSchema {
-        switch (unit) {
+    private static retrievePrecision(type: SizeType, schema?: SizeSchema): numberOptions {
+        switch (type) {
             case AbsoluteSizeTypes.CENTIMETER:
-                return { precision: this._schema.cmPrecision };
+                return schema?.cmOptions || defaultCMPrecision;
             case AbsoluteSizeTypes.MILLIMETER:
-                return { precision: this._schema.mmPrecision };
+                return schema?.mmOptions || defaultMMPrecision;
             case AbsoluteSizeTypes.QUARTER_MILLIMETER:
-                return { precision: this._schema.quarterMillimeterPrecision };
+                return schema?.quarterMillimeterOptions || defaultQuarterMillimeterPrecision;
             case AbsoluteSizeTypes.INCH:
-                return { precision: this._schema.inchPrecision };
-            case AbsoluteSizeTypes.POINT:   
-                return { precision: this._schema.pointPrecision };
+                return schema?.inchOptions || defaultInchPrecision;
+            case AbsoluteSizeTypes.POINT:
+                return schema?.pointOptions || defaultPointPrecision;
             case AbsoluteSizeTypes.PICA:
-                return { precision: this._schema.picaPrecision };
+                return schema?.picaOptions || defaultPicaPrecision;
             case AbsoluteSizeTypes.PIXEL:
-                return { precision: this._schema.pixelPrecision };
+                return schema?.pixelOptions || defaultPixelPrecision;
             case RelativeSizeTypes.PERCENTAGE:
-                return { precision: this._schema.percentagePrecision };
+                return schema?.percentageOptions || defaultPercentagePrecision;
             case RelativeSizeTypes.EM:
-                return { precision: this._schema.emPrecision };
+                return schema?.emOptions || defaultEmPrecision;
             case RelativeSizeTypes.EX:
-                return { precision: this._schema.exPrecision };
+                return schema?.exOptions || defaultExPrecision;
             case RelativeSizeTypes.CH:
-                return { precision: this._schema.chPrecision };
+                return schema?.chOptions || defaultChPrecision;
             case RelativeSizeTypes.REM:
-                return { precision: this._schema.remPrecision };
+                return schema?.remOptions || defaultRemPrecision;
             case RelativeSizeTypes.VIEWPORT_WIDTH:
-                return { precision: this._schema.vwPrecision };
+                return schema?.vwOptions || defaultVwPrecision;
             case RelativeSizeTypes.VIEWPORT_HEIGHT:
-                return { precision: this._schema.vhPrecision };
+                return schema?.vhOptions || defaultVhPrecision;
             case RelativeSizeTypes.VIEWPORT_MIN:
-                return { precision: this._schema.vminPrecision };
+                return schema?.vminOptions || defaultVminPrecision;
             case RelativeSizeTypes.VIEWPORT_MAX:
-                return { precision: this._schema.vmaxPrecision };
+                return schema?.vmaxOptions || defaultVmaxPrecision;
             case KeywordSizeTypes.AUTO:
                 return { precision: 1 };
             default:
-                throw new Error(`Invalid size type: ${unit}`);
+                throw new Error(`Invalid size type: ${type}`);
         }
+    }
+
+    private static retrieveToStringPrecision(type: SizeType, schema?: SizeSchema): toStringOptions {
+        switch (type) {
+            case AbsoluteSizeTypes.CENTIMETER:
+                return schema?.cmToStringOptions || defaultCMToStringPrecision;
+            case AbsoluteSizeTypes.MILLIMETER:
+                return schema?.mmToStringOptions || defaultMMToStringPrecision;
+            case AbsoluteSizeTypes.QUARTER_MILLIMETER:
+                return schema?.quarterMillimeterToStringOptions || defaultQuarterMillimeterToStringPrecision;
+            case AbsoluteSizeTypes.INCH:
+                return schema?.inchToStringOptions || defaultInchToStringPrecision;
+            case AbsoluteSizeTypes.POINT:
+                return schema?.pointToStringOptions || defaultPointToStringPrecision;
+            case AbsoluteSizeTypes.PICA:
+                return schema?.picaToStringOptions || defaultPicaToStringPrecision;
+            case AbsoluteSizeTypes.PIXEL:
+                return schema?.pixelToStringOptions || defaultPixelToStringPrecision;
+            case RelativeSizeTypes.PERCENTAGE:
+                return schema?.percentageToStringOptions || defaultPercentageToStringPrecision;
+            case RelativeSizeTypes.EM:
+                return schema?.emToStringOptions || defaultEmToStringPrecision;
+            case RelativeSizeTypes.EX:
+                return schema?.exToStringOptions || defaultExToStringPrecision;
+            case RelativeSizeTypes.CH:
+                return schema?.chToStringOptions || defaultChToStringPrecision;
+            case RelativeSizeTypes.REM:
+                return schema?.remToStringOptions || defaultRemToStringPrecision;
+            case RelativeSizeTypes.VIEWPORT_WIDTH:
+                return schema?.vwToStringOptions || defaultVWToStringPrecision;
+            case RelativeSizeTypes.VIEWPORT_HEIGHT:
+                return schema?.vhToStringOptions || defaultVHToStringPrecision;
+            case RelativeSizeTypes.VIEWPORT_MIN:
+                return schema?.vminToStringOptions || defaultVMinToStringPrecision;
+            case RelativeSizeTypes.VIEWPORT_MAX:
+                return schema?.vmaxToStringOptions || defaultVMaxToStringPrecision;
+            case KeywordSizeTypes.AUTO:
+                return { type: "auto" };
+            default:
+                throw new Error(`Invalid size type: ${type}`);
+        }
+    }
+
+    private static makeNumValueSchema(unit: SizeType, schema?: SizeSchema): NumSchema {
+        const precision = SizeValueFactory.retrievePrecision(unit, schema);
+        return { precision: precision.precision, rounding: precision.rounding };
+    }
+    
+    private makeNumValueSchema(unit: SizeType): NumSchema {
+        return SizeValueFactory.makeNumValueSchema(unit, this._schema);
+    }
+
+    private static makeNumValueSchemaForConvert(from: SizeType, to: SizeType, schema?: SizeSchema): NumSchema {
+        const fromPrecision = SizeValueFactory.retrievePrecision(from, schema).precision;
+        const toPrecision = SizeValueFactory.retrievePrecision(to, schema).precision;
+        return { precision: precisionForConvert(fromPrecision, toPrecision, schema?.convertExtraPrecision || defaultConvertExtraPrecision) };
+    }
+
+    private makeNumValueSchemaForConvert(from: SizeType, to: SizeType): NumSchema {
+        return SizeValueFactory.makeNumValueSchemaForConvert(from, to, this._schema);
     }
 
     static parse(size: string, type?: SizeType, schema?: SizeSchema): SizeValueFactory {
@@ -339,9 +413,9 @@ export class SizeValueFactory {
     }
 
     private storeSizeValue(to: SizeType) {
-        const numSchema = this.makeNumValueSchema(to);
+        const toNumSchema = this.makeNumValueSchema(to);
         if (this.unit === KeywordSizeTypes.AUTO) {
-            this.storeValue(NumValueFactory.ZERO(numSchema), to);
+            this.storeValue(NumValueFactory.ZERO(toNumSchema), to);
             return;
         }
         if (this.unit === to) {
@@ -349,16 +423,20 @@ export class SizeValueFactory {
         }
         let newValue: NumValueFactory;
         if (this.hasPixel) {
-            newValue = SizeConverter.convertSizeValue(this.pixel.value, AbsoluteSizeTypes.PIXEL, to, this._schema?.context, numSchema);
+            newValue = SizeConverter.convertSizeValue(this.pixel.value, AbsoluteSizeTypes.PIXEL, to, this._schema?.context, this.makeNumValueSchemaForConvert(AbsoluteSizeTypes.PIXEL, to))
+                .addSchema(toNumSchema);
             this.storeValue(newValue, to);
         } else {
             if(SizeConverter.isAbsoluteUnit(to)) {
-                newValue = SizeConverter.convertSizeValue(this._naturalValue.value, this.unit, to, this._schema?.context, numSchema);
+                newValue = SizeConverter.convertSizeValue(this._naturalValue.value, this.unit, to, this._schema?.context, this.makeNumValueSchemaForConvert(this.unit, to))
+                    .addSchema(toNumSchema);
                 this.storeValue(newValue, to);
             } else {
-                const pixelValue = SizeConverter.convertSizeValue(this._naturalValue.value, this.unit, AbsoluteSizeTypes.PIXEL, this._schema?.context, numSchema);
+                const pixelValue = SizeConverter.convertSizeValue(this._naturalValue.value, this.unit, AbsoluteSizeTypes.PIXEL, this._schema?.context, this.makeNumValueSchemaForConvert(this.unit, AbsoluteSizeTypes.PIXEL))
+                    .addSchema(this.makeNumValueSchema(AbsoluteSizeTypes.PIXEL));
                 this.storeValue(pixelValue, AbsoluteSizeTypes.PIXEL);
-                newValue = SizeConverter.convertSizeValue(pixelValue.value, AbsoluteSizeTypes.PIXEL, to, this._schema?.context, numSchema);
+                newValue = SizeConverter.convertSizeValue(pixelValue.value, AbsoluteSizeTypes.PIXEL, to, this._schema?.context, this.makeNumValueSchemaForConvert(AbsoluteSizeTypes.PIXEL, to))
+                    .addSchema(toNumSchema);
                 this.storeValue(newValue, to);
             }
         }
@@ -429,6 +507,259 @@ export class SizeValueFactory {
             unit: to
         };
     }
+
+    private static sizeToNumValue(size: SizeValue, schema?: SizeSchema): SizeNumValue {
+        return {
+            value: NumValueFactory.create(size.value, SizeValueFactory.makeNumValueSchema(size.unit, schema)),
+            unit: size.unit
+        };
+    }
+
+    private static convertSizeValue(
+        value: NumValueFactory|NumValue,
+        from: SizeType, 
+        to: SizeType, 
+        schema?: SizeSchema,
+    ): NumValueFactory {
+        if (from === KeywordSizeTypes.AUTO) {
+            return NumValueFactory.ZERO(SizeValueFactory.makeNumValueSchema(to, schema))
+        }
+        if (!(value instanceof NumValueFactory)) {
+            return SizeConverter.convertSizeValue(value, from, to, schema?.context, SizeValueFactory.makeNumValueSchemaForConvert(from, to, schema))
+                    .addSchema(SizeValueFactory.makeNumValueSchema(to, schema));
+        } else {
+            return SizeConverter.convertSizeValue(value.value, from, to, schema?.context, SizeValueFactory.makeNumValueSchemaForConvert(from, to, schema))
+                    .addSchema(SizeValueFactory.makeNumValueSchema(to, schema));
+        }
+    }
+
+    static toString(
+        size: SizeNumValue|SizeValue|undefined, 
+        to?: SizeType,
+        schema?: SizeSchema
+    ): string|undefined {
+        if (!size) {
+            return undefined;
+        }
+        if (to && size.unit !== to) {
+            switch (to) {
+                case KeywordSizeTypes.AUTO:
+                    return "auto";
+                default:    
+                    let newValue = SizeValueFactory.convertSizeValue(size.value, size.unit, to, schema);
+                    return SizeValueFactory.toString(SizeValueFactory.sizeToNumValue({ value: newValue.value, unit: to }, schema), undefined, schema);
+            }
+        }
+        let value = size;
+        if (!isSizeNumValue(value)) {
+            value = SizeValueFactory.sizeToNumValue(value, schema);
+        }
+        let valStr: string;
+        const toStringOptions = SizeValueFactory.retrieveToStringPrecision(value.unit, schema);
+        switch (toStringOptions.type) {
+            case "auto":
+                valStr = value.value.toString();
+                break;
+            case "fixed":
+                toStringOptions.rounding !== undefined && (value.value = value.value.addSchema({ rounding: toStringOptions.rounding }));
+                valStr = value.value.toFixed(toStringOptions.precision);
+                break;
+            case "precision":
+                toStringOptions.rounding !== undefined && (value.value = value.value.addSchema({ rounding: toStringOptions.rounding }));
+                valStr = value.value.toPrecision(toStringOptions.precision);
+                break;
+            default:
+                valStr = value.value.toString();
+                break;
+        }
+        switch (size.unit) {
+            case KeywordSizeTypes.AUTO:
+                return "auto";
+            case AbsoluteSizeTypes.CENTIMETER:
+                return `${valStr}cm`;
+            case AbsoluteSizeTypes.MILLIMETER:
+                return `${valStr}mm`;
+            case AbsoluteSizeTypes.QUARTER_MILLIMETER:
+                return `${valStr}Q`;
+            case AbsoluteSizeTypes.INCH:
+                return `${valStr}in`;
+            case AbsoluteSizeTypes.POINT:
+                return `${valStr}pt`;
+            case AbsoluteSizeTypes.PICA:
+                return `${valStr}pc`;
+            case AbsoluteSizeTypes.PIXEL:
+                return `${valStr}px`;
+            case RelativeSizeTypes.PERCENTAGE:
+                return `${valStr}%`;
+            case RelativeSizeTypes.EM:
+                return `${valStr}em`;
+            case RelativeSizeTypes.EX:
+                return `${valStr}ex`;
+            case RelativeSizeTypes.CH:
+                return `${valStr}ch`;
+            case RelativeSizeTypes.REM:
+                return `${valStr}rem`;
+            case RelativeSizeTypes.VIEWPORT_WIDTH:
+                return `${valStr}vw`;
+            case RelativeSizeTypes.VIEWPORT_HEIGHT:
+                return `${valStr}vh`;
+            case RelativeSizeTypes.VIEWPORT_MIN:    
+                return `${valStr}vmin`;
+            case RelativeSizeTypes.VIEWPORT_MAX:
+                return `${valStr}vmax`;
+            default:
+                throw new Error(`Invalid size type: ${size.unit}`);
+        }
+    }
+
+    toString(to?: SizeType): string|undefined {
+        if (to && this.unit !== to) {
+            switch (to) {
+                case KeywordSizeTypes.AUTO:
+                    return "auto";
+                default:    
+                    return SizeValueFactory.toString(this.toValue(to), undefined, this._schema);
+            }
+        }
+        switch (this.unit) {
+            case KeywordSizeTypes.AUTO:
+                return "auto";
+            default:
+                return SizeValueFactory.toString(this.toValue(), undefined, this._schema);
+        }
+    }
+    //         case ColorTypes.HEX:
+    //             return `${this.hex.hex}${this.hex.alpha}`;
+    //         case ColorTypes.RGB:
+    //             let rStr: string, gStr: string, bStr: string;
+    //             switch (this._schema.rgbToStringOptions?.type || "auto") {
+    //                 case "auto":
+    //                     rStr = this.rgb.r.toString();
+    //                     gStr = this.rgb.g.toString();
+    //                     bStr = this.rgb.b.toString();
+    //                     break;
+    //                 case "fixed":
+    //                     this.rgb.r = this.rgb.r.addSchema({ rounding: this._schema.rgbToStringOptions.rounding });
+    //                     this.rgb.g = this.rgb.g.addSchema({ rounding: this._schema.rgbToStringOptions.rounding });
+    //                     this.rgb.b = this.rgb.b.addSchema({ rounding: this._schema.rgbToStringOptions.rounding });
+    //                     rStr = this.rgb.r.toFixed(this._schema.rgbToStringOptions?.precision);
+    //                     gStr = this.rgb.g.toFixed(this._schema.rgbToStringOptions?.precision);
+    //                     bStr = this.rgb.b.toFixed(this._schema.rgbToStringOptions?.precision);
+    //                     break;
+    //                 case "precision":
+    //                     this.rgb.r = this.rgb.r.addSchema({ rounding: this._schema.rgbToStringOptions.rounding });
+    //                     this.rgb.g = this.rgb.g.addSchema({ rounding: this._schema.rgbToStringOptions.rounding });
+    //                     this.rgb.b = this.rgb.b.addSchema({ rounding: this._schema.rgbToStringOptions.rounding });
+    //                     rStr = this.rgb.r.toPrecision(this._schema.rgbToStringOptions?.precision);
+    //                     gStr = this.rgb.g.toPrecision(this._schema.rgbToStringOptions?.precision);
+    //                     bStr = this.rgb.b.toPrecision(this._schema.rgbToStringOptions?.precision);
+    //                     break;
+    //                 default:
+    //                     rStr = this.rgb.r.toString();
+    //                     gStr = this.rgb.g.toString();
+    //                     bStr = this.rgb.b.toString();
+    //                     break;
+    //             }
+    //             if (this.rgb.alpha !== undefined) {
+    //                 let aStr: string;
+    //                 switch (this._schema.alphaToStringOptions?.type || "auto") {
+    //                     case "auto":
+    //                         aStr = this.rgb.alpha!.toString();
+    //                         break;
+    //                     case "fixed":
+    //                         this.rgb.alpha = this.rgb.alpha?.addSchema({ rounding: this._schema.alphaToStringOptions.rounding });
+    //                         aStr = this.rgb.alpha!.toFixed(this._schema.alphaToStringOptions?.precision);
+    //                         break;
+    //                     case "precision":
+    //                         this.rgb.alpha = this.rgb.alpha?.addSchema({ rounding: this._schema.alphaToStringOptions.rounding });
+    //                         aStr = this.rgb.alpha!.toPrecision(this._schema.alphaToStringOptions?.precision);
+    //                         break;
+    //                     default:
+    //                         aStr = this.rgb.alpha!.toString();
+    //                         break;
+    //                 }
+    //                 return `rgba(${rStr}, ${gStr}, ${bStr}, ${aStr})`;
+    //             }
+    //             return `rgb(${rStr}, ${gStr}, ${bStr})`;
+    //         case ColorTypes.HSL:
+    //             let hStr: string, sStr: string, lStr: string;
+    //             switch (this._schema.hslHueToStringOptions?.type || "auto") {
+    //                 case "auto":
+    //                     hStr = this.hsl.h.toString();
+    //                     break;
+    //                 case "fixed":
+    //                     this.hsl.h = this.hsl.h.addSchema({ rounding: this._schema.hslHueToStringOptions.rounding });
+    //                     hStr = this.hsl.h.toFixed(this._schema.hslHueToStringOptions?.precision);
+    //                     break;
+    //                 case "precision":
+    //                     this.hsl.h = this.hsl.h.addSchema({ rounding: this._schema.hslHueToStringOptions.rounding });
+    //                     hStr = this.hsl.h.toPrecision(this._schema.hslHueToStringOptions?.precision);
+    //                     break;
+    //                 default:
+    //                     hStr = this.hsl.h.toString();
+    //                     break;
+    //             }
+    //             switch (this._schema.hslSaturationToStringOptions?.type || "auto") {
+    //                 case "auto":
+    //                     sStr = this.hsl.s.toString();
+    //                     break;
+    //                 case "fixed":   
+    //                     this.hsl.s = this.hsl.s.addSchema({ rounding: this._schema.hslSaturationToStringOptions.rounding });
+    //                     sStr = this.hsl.s.toFixed(this._schema.hslSaturationToStringOptions?.precision);
+    //                     break;
+    //                 case "precision":   
+    //                     this.hsl.s = this.hsl.s.addSchema({ rounding: this._schema.hslSaturationToStringOptions.rounding });
+    //                     sStr = this.hsl.s.toPrecision(this._schema.hslSaturationToStringOptions?.precision);
+    //                     break;
+    //                 default:
+    //                     sStr = this.hsl.s.toString();
+    //                     break;
+    //             }
+    //             switch (this._schema.hslLightnessToStringOptions?.type || "auto") {
+    //                 case "auto":
+    //                     lStr = this.hsl.l.toString();
+    //                     break;
+    //                 case "fixed":
+    //                     this.hsl.l = this.hsl.l.addSchema({ rounding: this._schema.hslLightnessToStringOptions.rounding });
+    //                     lStr = this.hsl.l.toFixed(this._schema.hslLightnessToStringOptions?.precision);
+    //                     break;
+    //                 case "precision":
+    //                     this.hsl.l = this.hsl.l.addSchema({ rounding: this._schema.hslLightnessToStringOptions.rounding });
+    //                     lStr = this.hsl.l.toPrecision(this._schema.hslLightnessToStringOptions?.precision);
+    //                     break;
+    //                 default:
+    //                     lStr = this.hsl.l.toString();
+    //                     break;
+    //             }
+    //             if (this.hsl.alpha !== undefined) {
+    //                 let aStr: string;
+    //                 switch (this._schema.alphaToStringOptions?.type || "auto") {
+    //                     case "auto":
+    //                         aStr = this.hsl.alpha!.toString();
+    //                         break;
+    //                     case "fixed":
+    //                         this.hsl.alpha = this.hsl.alpha?.addSchema({ rounding: this._schema.alphaToStringOptions.rounding });
+    //                         aStr = this.hsl.alpha!.toFixed(this._schema.alphaToStringOptions?.precision);
+    //                         break;
+    //                     case "precision":
+    //                         this.hsl.alpha = this.hsl.alpha?.addSchema({ rounding: this._schema.alphaToStringOptions.rounding });
+    //                         aStr = this.hsl.alpha!.toPrecision(this._schema.alphaToStringOptions?.precision);
+    //                         break;
+    //                     default:
+    //                         aStr = this.hsl.alpha!.toString();
+    //                         break;
+    //                 }
+    //                 return `hsla(${hStr}, ${sStr}%, ${lStr}%, ${aStr})`;
+    //             }
+    //             return `hsl(${hStr}, ${sStr}%, ${lStr}%)`;
+    //         case ColorTypes.KEYWORD:
+    //             return this._data.keyword?.value || "";
+    //         case ColorTypes.TRANSPARENT:
+    //             return "transparent";
+    //         default:
+    //             return "";
+    //     }
+    // }
 
     get hasCm() {
         return this._cmCache !== undefined;

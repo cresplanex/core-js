@@ -1,4 +1,5 @@
 import { NumValueFactory } from "../number";
+import { ColorValueFactory } from "./color";
 import { ColorSchema } from "./schema";
 import { ColorHexData, ColorHSLNumData, ColorRGBNumData } from "./types";
 
@@ -7,40 +8,44 @@ export class ColorConverter {
         rgb: ColorRGBNumData,
         schema?: ColorSchema,
     ): ColorHSLNumData {
-        const rRate = rgb.r.setSchema({ precision: schema?.rgbRatePrecision }).div(255);
-        const gRate = rgb.g.setSchema({ precision: schema?.rgbRatePrecision }).div(255);
-        const bRate = rgb.b.setSchema({ precision: schema?.rgbRatePrecision }).div(255);
+        const rgbRateConvertNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("rgb", "rgbRate", schema);
+        const rRate = rgb.r.setSchema({ ...rgbRateConvertNumSchema }).div(255);
+        const gRate = rgb.g.setSchema({ ...rgbRateConvertNumSchema }).div(255);
+        const bRate = rgb.b.setSchema({ ...rgbRateConvertNumSchema }).div(255);
         const max = rRate.max(gRate, bRate);
         const min = rRate.min(gRate, bRate);
-        const l = max.setSchema({ precision: schema?.hslLightnessPrecision }).add(min).div(2);
+        const rgbRateToLightnessConvertNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("rgbRate", "lightness", schema);
+        const l = max.setSchema({ ...rgbRateToLightnessConvertNumSchema }).add(min).div(2);
         if (max.equals(min)) {
             return {
-                h: NumValueFactory.ZERO({ precision: schema?.hslHuePrecision }),
-                s: NumValueFactory.ZERO({ precision: schema?.hslSaturationPrecision }),
-                l: l.mul(100),
+                h: NumValueFactory.ZERO({ ...ColorValueFactory.makeNumValueSchema("hue", schema) }),
+                s: NumValueFactory.ZERO({ ...ColorValueFactory.makeNumValueSchema("saturation", schema) }),
+                l: l.mul(100).addSchema({ ...ColorValueFactory.makeNumValueSchema("lightness", schema) }),
                 alpha: rgb.alpha,
             };
         }
         const d = max.sub(min);
+        const rgbRateToSaturationConvertNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("rgbRate", "saturation", schema);
         const s = l.gt(0.5) ? 
-            d.setSchema({ precision: schema?.hslSaturationPrecision }).div(max.neg().add(2).sub(min)) :
-            d.setSchema({ precision: schema?.hslSaturationPrecision }).div(max.add(min));
-        let h = NumValueFactory.ZERO({ precision: schema?.hslHuePrecision });
+            d.setSchema({ ...rgbRateToSaturationConvertNumSchema }).div(max.neg().add(2).sub(min)) :
+            d.setSchema({ ...rgbRateToSaturationConvertNumSchema }).div(max.add(min));
+        const rgbRateToHueConvertNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("rgbRate", "hue", schema);
+        let h = NumValueFactory.ZERO({ ...rgbRateToHueConvertNumSchema });
         if (max.equals(rRate)) {
-            h = gRate.sub(bRate).setSchema({ precision: schema?.hslHuePrecision }).div(d);
+            h = gRate.sub(bRate).setSchema({ ...rgbRateToHueConvertNumSchema }).div(d);
             if (gRate.lt(bRate)) {
                 h = h.add(6);
             }
         } else if (max.equals(gRate)) {
-            h = bRate.sub(rRate).setSchema({ precision: schema?.hslHuePrecision }).div(d).add(2);
+            h = bRate.sub(rRate).setSchema({ ...rgbRateToHueConvertNumSchema }).div(d).add(2);
         } else if (max.equals(bRate)) {
-            h = rRate.sub(gRate).setSchema({ precision: schema?.hslHuePrecision }).div(d).add(4);
+            h = rRate.sub(gRate).setSchema({ ...rgbRateToHueConvertNumSchema }).div(d).add(4);
         }
         h = h.mul(60);
         return {
-            h,
-            s: s.mul(100),
-            l: l.mul(100),
+            h: h.addSchema({ ...ColorValueFactory.makeNumValueSchema("hue", schema) }),
+            s: s.mul(100).addSchema({ ...ColorValueFactory.makeNumValueSchema("saturation", schema) }),
+            l: l.mul(100).addSchema({ ...ColorValueFactory.makeNumValueSchema("lightness", schema) }),
             alpha: rgb.alpha,
         };
     }
@@ -62,25 +67,38 @@ export class ColorConverter {
         hsl: ColorHSLNumData,
         schema?: ColorSchema,
     ): ColorRGBNumData {
-        const h = hsl.h.setSchema({ precision: schema?.hslHueRatePrecision }).div(360).setSchema({ precision: schema?.rgbPrecision });
-        const s = hsl.s.setSchema({ precision: schema?.hslSaturationRatePrecision }).div(100);
-        const l = hsl.l.setSchema({ precision: schema?.hslLightnessRatePrecision }).div(100);
-        const q = l.lt(0.5) ? l.mul(s.add(1)) : l.add(s).sub(l.mul(s)).setSchema({ precision: schema?.rgbPrecision });
-        const p = l.mul(2).sub(q).setSchema({ precision: schema?.rgbPrecision });
+        const hueRateConvertNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("hue", "hueRate", schema);
+        const sRateConvertNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("saturation", "saturationRate", schema);
+        const lRateConvertNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("lightness", "lightnessRate", schema);
+        const hueRateToRgbConvertNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("hueRate", "rgb", schema);
+        const h = hsl.h.setSchema({ ...hueRateConvertNumSchema }).div(360).setSchema({ ...hueRateToRgbConvertNumSchema });
+        const s = hsl.s.setSchema({ ...sRateConvertNumSchema }).div(100);
+        const l = hsl.l.setSchema({ ...lRateConvertNumSchema }).div(100);
+        const lightnessRateToRgbConvertNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("lightnessRate", "rgb", schema);
+        const q = l.lt(0.5) ? l.mul(s.add(1)) : l.add(s).sub(l.mul(s)).setSchema({ ...lightnessRateToRgbConvertNumSchema });
+        const p = l.mul(2).sub(q).setSchema({ ...lightnessRateToRgbConvertNumSchema });
         const r = this.hueToRgb(p, q, h.add(1/3));
         const g = this.hueToRgb(p, q, h);
         const b = this.hueToRgb(p, q, h.sub(1/3));
         return {
-            r: r.mul(255),
-            g: g.mul(255),
-            b: b.mul(255),
+            r: r.mul(255).addSchema({ ...ColorValueFactory.makeNumValueSchema("rgb", schema) }),
+            g: g.mul(255).addSchema({ ...ColorValueFactory.makeNumValueSchema("rgb", schema) }),
+            b: b.mul(255).addSchema({ ...ColorValueFactory.makeNumValueSchema("rgb", schema) }),
             alpha: hsl.alpha,
         };
     }
 
     static rgbToHex(
         rgb: ColorRGBNumData,
+        schema?: ColorSchema,
     ): ColorHexData {
+        const rgbNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("rgb", undefined, schema);
+        rgb = {
+            r: rgb.r.setSchema({ ...rgbNumSchema }),
+            g: rgb.g.setSchema({ ...rgbNumSchema }),
+            b: rgb.b.setSchema({ ...rgbNumSchema }),
+            alpha: rgb.alpha?.setSchema({ ...ColorValueFactory.makeNumValueSchemaForConvert("alpha", undefined, schema) }),
+        };
         const hex = (c: NumValueFactory) => {
             const value = c.round();
             const hex = value.toHex().slice(2);
@@ -89,7 +107,7 @@ export class ColorConverter {
         if (rgb.alpha === undefined) {
             return { hex: `#${hex(rgb.r)}${hex(rgb.g)}${hex(rgb.b)}`, alpha: "ff" };
         }
-        const alpha = rgb.alpha.mul(255).round();
+        const alpha = rgb.alpha.mul(255);
         if (alpha.lt(255)) {
             return {
                 hex: `#${hex(rgb.r)}${hex(rgb.g)}${hex(rgb.b)}`,
@@ -126,10 +144,12 @@ export class ColorConverter {
         const rStr = `0x${c.slice(0, 2)}`;
         const gStr = `0x${c.slice(2, 4)}`;
         const bStr = `0x${c.slice(4, 6)}`;
-        const r = NumValueFactory.parse(rStr).setSchema({ precision: schema?.rgbPrecision });
-        const g = NumValueFactory.parse(gStr).setSchema({ precision: schema?.rgbPrecision });
-        const b = NumValueFactory.parse(bStr).setSchema({ precision: schema?.rgbPrecision });
-        const a = NumValueFactory.parse(`0x${alpha}`).div(255).setSchema({ precision: schema?.alphaPrecision });
+        const rgbNumSchema = ColorValueFactory.makeNumValueSchema("rgb", schema);
+        const r = NumValueFactory.parse(rStr, rgbNumSchema);
+        const g = NumValueFactory.parse(gStr, rgbNumSchema);
+        const b = NumValueFactory.parse(bStr, rgbNumSchema);
+        const alphaNumSchema = ColorValueFactory.makeNumValueSchemaForConvert("alpha", undefined, schema);
+        const a = NumValueFactory.parse(`0x${alpha}`, alphaNumSchema).div(255).addSchema(ColorValueFactory.makeNumValueSchema("alpha", schema));
         return {
             r,
             g,
@@ -152,16 +172,16 @@ export class ColorConverter {
     } {
         return {
             rgb: { 
-                r: NumValueFactory.ZERO({ precision: schema?.rgbPrecision }),
-                g: NumValueFactory.ZERO({ precision: schema?.rgbPrecision }),
-                b: NumValueFactory.ZERO({ precision: schema?.rgbPrecision }),
-                alpha: NumValueFactory.ZERO({ precision: schema?.alphaPrecision }),
+                r: NumValueFactory.ZERO({ ...ColorValueFactory.makeNumValueSchema("rgb", schema) }),
+                g: NumValueFactory.ZERO({ ...ColorValueFactory.makeNumValueSchema("rgb", schema) }),
+                b: NumValueFactory.ZERO({ ...ColorValueFactory.makeNumValueSchema("rgb", schema) }),
+                alpha: NumValueFactory.ZERO({ ...ColorValueFactory.makeNumValueSchema("alpha", schema) }),
             },
             hsl: { 
-                h: NumValueFactory.ZERO({ precision: schema?.hslHuePrecision }),
-                s: NumValueFactory.ZERO({ precision: schema?.hslSaturationPrecision }),
-                l: NumValueFactory.ZERO({ precision: schema?.hslLightnessPrecision }),
-                alpha: NumValueFactory.ZERO({ precision: schema?.alphaPrecision }),
+                h: NumValueFactory.ZERO({ ...ColorValueFactory.makeNumValueSchema("hue", schema) }),
+                s: NumValueFactory.ZERO({ ...ColorValueFactory.makeNumValueSchema("saturation", schema) }),
+                l: NumValueFactory.ZERO({ ...ColorValueFactory.makeNumValueSchema("lightness", schema) }),
+                alpha: NumValueFactory.ZERO({ ...ColorValueFactory.makeNumValueSchema("alpha", schema) }),
             },
             hex: { hex: "#000000", alpha: "00" },
         };

@@ -2,6 +2,7 @@ import {
     ColorTypes,
     ColorValueFactory 
 } from "../";
+import { NumRoundings } from "../../number";
 
 describe("ColorValueFactory", () => {
     test("fromHex and toString (length: 6)", () => {
@@ -133,8 +134,12 @@ describe("ColorValueFactory", () => {
     });
 
     test("toString with to parameter", () => {
-        const factory = ColorValueFactory.parse("rgba(255, 255, 255, 0.5)");
+        const factory = ColorValueFactory.parse("rgba(255, 255, 255, 0.5)", undefined, {
+            rgbOptions: { precision: 3 },
+            alphaOptions: { precision: 5 },
+        });
         expect(factory.toString(ColorTypes.HEX)).toBe("#ffffff80");
+        // console
     });
 
     test("static toString with to parameter", () => {
@@ -145,7 +150,7 @@ describe("ColorValueFactory", () => {
         expect(ColorValueFactory.toString({
             type: ColorTypes.HEX,
             hex: { hex: "#ffffff", alpha: "80" }
-        }, ColorTypes.RGB, true, { alphaToStringPrecision: {type: "fixed", precision: 2} })).toBe("rgba(255, 255, 255, 0.50)");
+        }, ColorTypes.RGB, { alphaToStringOptions: {type: "fixed", precision: 2} })).toBe("rgba(255, 255, 255, 0.50)");
     });
 
     test("equal test", () => {
@@ -190,8 +195,8 @@ describe("ColorValueFactory", () => {
             "rgba(128,128,128, 0.5)",
             undefined,
             {
-                rgbPrecision: 3,
-                alphaPrecision: 2,
+                rgbOptions: { precision: 3 },
+                alphaOptions: { precision: 2 },
             }
         );
         const attached = factory.attachStyle({
@@ -255,5 +260,57 @@ describe("ColorValueFactory", () => {
             "hsla(+120, +120%, -120%, -.5)",
         );
         expect(factory3.toString()).toBe("hsla(120, 100%, 0%, 0)");
+    });
+
+    test("toString with Precision", () => {
+        const factory = ColorValueFactory.parse(
+            "rgba(128, 128, 128, 0.5)",
+            undefined,
+            {
+                rgbToStringOptions: { type: "fixed", precision: 3 },
+                alphaToStringOptions: { type: "auto" },
+            }
+        );
+        expect(factory.toString()).toBe("rgba(128.000, 128.000, 128.000, 0.5)");
+
+        const factory2 = ColorValueFactory.parse(
+            "rgba(128, 128, 128, 0.5)",
+            undefined,
+            {
+                rgbToStringOptions: { type: "precision", precision: 2 },
+                alphaToStringOptions: { type: "auto" },
+            }
+        );
+        expect(factory2.toString()).toBe("rgba(1.3e+2, 1.3e+2, 1.3e+2, 0.5)");
+
+        const factory3 = ColorValueFactory.parse(
+            "rgba(128, 128, 128, 0.5)",
+            undefined,
+            {
+                rgbToStringOptions: { type: "precision", precision: 2 },
+                alphaToStringOptions: { type: "precision", precision: 2 },
+            }
+        );
+        expect(factory3.toString()).toBe("rgba(1.3e+2, 1.3e+2, 1.3e+2, 0.50)");
+
+        const factory4 = ColorValueFactory.parse(
+            "rgba(128, 128, 128, 0.75)",
+            undefined,
+            {
+                rgbToStringOptions: { type: "precision", precision: 2 },
+                alphaToStringOptions: { type: "precision", precision: 1 },
+            }
+        );
+        expect(factory4.toString()).toBe("rgba(1.3e+2, 1.3e+2, 1.3e+2, 0.8)");
+
+        const factory5 = ColorValueFactory.parse(
+            "rgba(128, 128, 128, 0.75)",
+            undefined,
+            {
+                rgbToStringOptions: { type: "precision", precision: 2 },
+                alphaToStringOptions: { type: "precision", precision: 1, rounding: NumRoundings.ROUND_HALF_DOWN },
+            }
+        );
+        expect(factory5.toString()).toBe("rgba(1.3e+2, 1.3e+2, 1.3e+2, 0.7)");
     });
 });

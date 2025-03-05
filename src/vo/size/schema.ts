@@ -1,4 +1,4 @@
-import { NumValueFactory } from "../number";
+import { numberOptions, NumValueFactory, toStringOptions } from "../number";
 import { AbsoluteSizeType, RelativeSizeType } from "./types";
 
 export interface SizeConversionContext {
@@ -39,25 +39,42 @@ export interface SizeEqualOptions {
 }
 
 export interface SizeSchema {
-    cmPrecision?: number;
-    mmPrecision?: number;
-    quarterMillimeterPrecision?: number;
-    inchPrecision?: number;
-    pointPrecision?: number;
-    picaPrecision?: number;
-    pixelPrecision?: number;
-    percentagePrecision?: number;
-    emPrecision?: number;
-    exPrecision?: number;
-    chPrecision?: number;
-    remPrecision?: number;
-    vwPrecision?: number;
-    vhPrecision?: number;
-    vminPrecision?: number;
-    vmaxPrecision?: number;
+    cmOptions?: numberOptions;
+    mmOptions?: numberOptions;
+    quarterMillimeterOptions?: numberOptions;
+    inchOptions?: numberOptions;
+    pointOptions?: numberOptions;
+    picaOptions?: numberOptions;
+    pixelOptions?: numberOptions;
+    percentageOptions?: numberOptions;
+    emOptions?: numberOptions;
+    exOptions?: numberOptions;
+    chOptions?: numberOptions;
+    remOptions?: numberOptions;
+    vwOptions?: numberOptions;
+    vhOptions?: numberOptions;
+    vminOptions?: numberOptions;
+    vmaxOptions?: numberOptions;
     context?: SizeConversionContext;
     noMatchSupportUnit?: "throw" | "auto";
     equalOptions?: SizeEqualOptions;
+    cmToStringOptions?: toStringOptions;
+    mmToStringOptions?: toStringOptions;
+    quarterMillimeterToStringOptions?: toStringOptions;
+    inchToStringOptions?: toStringOptions;
+    pointToStringOptions?: toStringOptions;
+    picaToStringOptions?: toStringOptions;
+    pixelToStringOptions?: toStringOptions;
+    percentageToStringOptions?: toStringOptions;
+    emToStringOptions?: toStringOptions;
+    exToStringOptions?: toStringOptions;
+    chToStringOptions?: toStringOptions;
+    remToStringOptions?: toStringOptions;
+    vwToStringOptions?: toStringOptions;
+    vhToStringOptions?: toStringOptions;
+    vminToStringOptions?: toStringOptions;
+    vmaxToStringOptions?: toStringOptions;
+    convertExtraPrecision?: number;
 }
 
 export type FilledSizeSchema = Required<SizeSchema>;
