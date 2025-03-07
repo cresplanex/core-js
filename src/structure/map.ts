@@ -1,11 +1,4 @@
-/**
- * Utility module to work with key-value stores.
- *
- * @module map
- */
-
 export class CoreMap<K, V> {
-    
     private _values: Map<K, V>;
 
     constructor(entries?: Iterable<[K, V]>) {

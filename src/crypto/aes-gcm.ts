@@ -5,7 +5,7 @@
 import * as encoding from '../utils/encoding'
 import * as decoding from '../utils/decoding'
 import * as webcrypto from '../csprng'
-import * as string from '../utils/string'
+import { stringUtil } from '../utils'
 export { exportKeyJwk, exportKeyRaw } from './common'
 
 /**
@@ -102,7 +102,7 @@ export const importKeyRaw = (raw: Uint8Array, { usages = defaultUsages, extracta
  * @param {Uint8Array | string} data
  */
 const toBinary = (data: Uint8Array | string) => {
-    const encoded = typeof data === 'string' ? string.encodeUtf8(data) : data
+    const encoded = typeof data === 'string' ? stringUtil.encodeUtf8(data) : data
     if (!encoded) {
         throw new Error('Failed to encode data')
     }

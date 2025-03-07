@@ -1,118 +1,55 @@
-import Decimal from "decimal.js"
-
-export class NumValue extends Decimal {}
-
-export const add = (a: number|string|NumValue, b: number|string|NumValue): number => {
-    return NumValue.add(a, b).toNumber()
+export const add = (a: number, b: number) => a + b
+export const abs = (value: number) => Math.abs(value)
+export const ceil = (value: number) => Math.ceil(value)
+export const floor = (value: number) => Math.floor(value)
+export const round = (value: number) => Math.round(value)
+export const max = (...values: number[]) => Math.max(...values)
+export const min = (...values: number[]) => Math.min(...values)
+export const pow = (base: number, exponent: number) => Math.pow(base, exponent)
+export const sqrt = (value: number) => Math.sqrt(value)
+export const cbrt = (value: number) => Math.cbrt(value)
+export const exp = (value: number) => Math.exp(value)
+export const exp10 = (value: number) => Math.pow(10, value)
+export const exp2 = (value: number) => Math.pow(2, value)
+export const expm1 = (value: number) => Math.expm1(value)
+export const hypot = (...values: number[]) => Math.hypot(...values)
+export const log1p = (value: number) => Math.log1p(value)
+export const log = (value: number) => Math.log(value)
+export const log10 = (value: number) => Math.log10(value)
+export const log2 = (value: number) => Math.log2(value)
+export const sin = (value: number) => Math.sin(value)
+export const cos = (value: number) => Math.cos(value)
+export const tan = (value: number) => Math.tan(value)
+export const asin = (value: number) => Math.asin(value)
+export const acos = (value: number) => Math.acos(value)
+export const atan = (value: number) => Math.atan(value)
+export const atan2 = (y: number, x: number) => Math.atan2(y, x)
+export const sinh = (value: number) => Math.sinh(value)
+export const cosh = (value: number) => Math.cosh(value)
+export const tanh = (value: number) => Math.tanh(value)
+export const asinh = (value: number) => Math.asinh(value)
+export const acosh = (value: number) => Math.acosh(value)
+export const atanh = (value: number) => Math.atanh(value)
+export const imul = (a: number, b: number) => Math.imul(a, b)
+export const sign = (value: number) => Math.sign(value)
+export const trunc = (value: number) => Math.trunc(value)
+export const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
+export const lerp = (a: number, b: number, t: number) => a + (b - a) * t
+export const inverseLerp = (a: number, b: number, value: number) => (value - a) / (b - a)
+export const smoothStep = (a: number, b: number, t: number) => {
+    t = Math.min(Math.max((t - a) / (b - a), 0), 1)
+    return t * t * (3 - 2 * t)
 }
-export const sub = (a: number|string|NumValue, b: number|string|NumValue): number => {
-    return NumValue.sub(a, b).toNumber()
+export const smootherStep = (a: number, b: number, t: number) => {
+    t = Math.min(Math.max((t - a) / (b - a), 0), 1)
+    return t * t * t * (t * (t * 6 - 15) + 10)
 }
-export const mul = (a: number|string|NumValue, b: number|string|NumValue): number => {
-    return NumValue.mul(a, b).toNumber()
-}
-export const div = (a: number|string|NumValue, b: number|string|NumValue): number => {
-    return NumValue.div(a, b).toNumber()
-}
-export const mod = (a: number|string|NumValue, b: number|string|NumValue): number => {
-    return NumValue.mod(a, b).toNumber()
-}
-export const pow = (a: number|string|NumValue, b: number|string|NumValue): number => {
-    return NumValue.pow(a, b).toNumber()
-}
-export const sum = (...a: (number|string|NumValue)[]): number => {
-    return NumValue.sum(...a).toNumber()
-}
-export const abs = (a: number|string|NumValue): number => {
-    return NumValue.abs(a).toNumber()
-}
-export const ceil = (a: number|string|NumValue): number => {
-    return NumValue.ceil(a).toNumber()
-}
-export const floor = (a: number|string|NumValue): number => {
-    return NumValue.floor(a).toNumber()
-}
-export const round = (a: number|string|NumValue): number => {
-    return NumValue.round(a).toNumber()
-}
-export const sqrt = (a: number|string|NumValue): number => {
-    return NumValue.sqrt(a).toNumber()
-}
-export const ln = (a: number|string|NumValue): number => {
-    return NumValue.ln(a).toNumber()
-}
-export const log = (a: number|string|NumValue, b: number|string|NumValue): number => {
-    return NumValue.log(a, b).toNumber()
-}
-export const log2 = (a: number|string|NumValue): number => {
-    return NumValue.log2(a).toNumber()
-}
-export const log10 = (a: number|string|NumValue): number => {
-    return NumValue.log10(a).toNumber()
-}
-export const exp = (a: number|string|NumValue): number => {
-    return NumValue.exp(a).toNumber()
-}
-export const clamp = (a: number|string|NumValue, min: number|string|NumValue, max: number|string|NumValue): number => {
-    return NumValue.clamp(a, min, max).toNumber()
-}
-export const min = (...a: (number|string|NumValue)[]): number => {
-    return NumValue.min(...a).toNumber()
-}
-export const max = (...a: (number|string|NumValue)[]): number => {
-    return NumValue.max(...a).toNumber()
-}
-export const trunc = (a: number|string|NumValue): number => {
-    return NumValue.trunc(a).toNumber()
-}
-export const cbrt = (a: number|string|NumValue): number => {
-    return NumValue.cbrt(a).toNumber()
-}
-export const hypot = (...a: (number|string|NumValue)[]): number => {
-    return NumValue.hypot(...a).toNumber()
-}
-export const sign = (a: number|string|NumValue): number => {
-    return NumValue.sign(a)
-}
-export const cos = (a: number|string|NumValue): number => {
-    return NumValue.cos(a).toNumber()
-}
-export const sin = (a: number|string|NumValue): number => {
-    return NumValue.sin(a).toNumber()
-}
-export const tan = (a: number|string|NumValue): number => {
-    return NumValue.tan(a).toNumber()
-}
-export const acos = (a: number|string|NumValue): number => {
-    return NumValue.acos(a).toNumber()
-}
-export const asin = (a: number|string|NumValue): number => {
-    return NumValue.asin(a).toNumber()
-}
-export const atan = (a: number|string|NumValue): number => {
-    return NumValue.atan(a).toNumber()
-}
-export const atan2 = (a: number|string|NumValue, b: number|string|NumValue): number => {
-    return NumValue.atan2(a, b).toNumber()
-}
-export const cosh = (a: number|string|NumValue): number => {
-    return NumValue.cosh(a).toNumber()
-}
-export const sinh = (a: number|string|NumValue): number => {
-    return NumValue.sinh(a).toNumber()
-}
-export const tanh = (a: number|string|NumValue): number => {
-    return NumValue.tanh(a).toNumber()
-}
-export const acosh = (a: number|string|NumValue): number => {
-    return NumValue.acosh(a).toNumber()
-}
-export const asinh = (a: number|string|NumValue): number => {
-    return NumValue.asinh(a).toNumber()
-}
-export const atanh = (a: number|string|NumValue): number => {
-    return NumValue.atanh(a).toNumber()
-}
-export const random = (significantDigits?: number): number => {
-    return NumValue.random(significantDigits).toNumber()
+export const isPowerOfTwo = (value: number) => (value & (value - 1)) === 0
+export const nextPowerOfTwo = (value: number) => Math.pow(2, Math.ceil(Math.log2(value)))
+export const prevPowerOfTwo = (value: number) => Math.pow(2, Math.floor(Math.log2(value)))
+export const mod = (value: number, divisor: number) => ((value % divisor) + divisor) % divisor
+export const fract = (value: number) => value - Math.floor(value)
+export const degToRad = (degrees: number) => degrees * Math.PI / 180
+export const fixFloatingPoint = (num: number, multiplier: number) => {
+    return round((num * multiplier) + Number.EPSILON)
 }

@@ -1,136 +1,136 @@
-import { CoreArray } from "../array";
+import { CoreArray } from "..";
 
 describe("CoreArray", () => {
-    test("初期化時に値がない場合、size は 0 であるべき", () => {
+    test("When initialized with no values, size should be 0", () => {
         const arr = new CoreArray<number>();
         expect(arr.size).toBe(0);
     });
 
-    test("初期化時に配列を渡すと、その値が含まれる", () => {
+    test("When initialized with an array, it should contain those values", () => {
         const arr = new CoreArray<number>([1, 2, 3]);
         expect(arr.toArray()).toEqual([1, 2, 3]);
         expect(arr.size).toBe(3);
     });
 
-    test("add() で値を追加できる", () => {
+    test("add() should add a value", () => {
         const arr = new CoreArray<number>();
         arr.add(10);
         expect(arr.has(10)).toBe(true);
         expect(arr.size).toBe(1);
     });
 
-    test("delete() で値を削除できる", () => {
+    test("delete() should remove a value", () => {
         const arr = new CoreArray<number>([1, 2, 3]);
         expect(arr.delete(2)).toBe(true);
         expect(arr.has(2)).toBe(false);
         expect(arr.size).toBe(2);
     });
 
-    test("clear() で全ての値を削除できる", () => {
+    test("clear() should remove all values", () => {
         const arr = new CoreArray<number>([1, 2, 3]);
         arr.clear();
         expect(arr.size).toBe(0);
     });
 
-    test("first() は最初の要素を返す", () => {
+    test("first() should return the first element", () => {
         const arr = new CoreArray<string>(["a", "b", "c"]);
         expect(arr.first()).toBe("a");
     });
 
-    test("values() は Array の iterator を返す", () => {
+    test("values() should return the iterator of the Array", () => {
         const arr = new CoreArray<number>([1, 2, 3]);
         const values = Array.from(arr.values());
         expect(values).toEqual([1, 2, 3]);
     });
 
-    test("CoreArray は iterable である", () => {
+    test("CoreArray should be iterable", () => {
         const arr = new CoreArray<number>([1, 2, 3]);
         const iteratedValues = [...arr];
         expect(iteratedValues).toEqual([1, 2, 3]);
     });
 
-    // **union() のテスト**
-    test("union() は2つの CoreArray を統合する", () => {
+    // **Tests for union()**
+    test("union() should merge two CoreArrays", () => {
         const arrA = new CoreArray<number>([1, 2]);
         const arrB = new CoreArray<number>([2, 3]);
         expect(arrA.union(arrB).toArray()).toEqual([1, 2, 2, 3]);
     });
 
-    // **intersection() のテスト**
-    test("intersection() は2つの CoreArray の共通要素を返す", () => {
+    // **Tests for intersection()**
+    test("intersection() should return the common elements of two CoreArrays", () => {
         const arrA = new CoreArray<number>([1, 2, 3]);
         const arrB = new CoreArray<number>([2, 3, 4]);
         expect(arrA.intersection(arrB).toArray()).toEqual([2, 3]);
     });
 
-    test("intersection() で共通要素がない場合、空の配列を返す", () => {
+    test("intersection() should return an empty array when there are no common elements", () => {
         const arrA = new CoreArray<number>([1, 2]);
         const arrB = new CoreArray<number>([3, 4]);
         expect(arrA.intersection(arrB).toArray()).toEqual([]);
     });
 
-    // **difference() のテスト**
-    test("difference() は2つの CoreArray の差分を返す", () => {
+    // **Tests for difference()**
+    test("difference() should return the difference between two CoreArrays", () => {
         const arrA = new CoreArray<number>([1, 2, 3]);
         const arrB = new CoreArray<number>([2, 3, 4]);
         expect(arrA.difference(arrB).toArray()).toEqual([1]);
         expect(arrB.difference(arrA).toArray()).toEqual([4]);
     });
 
-    test("difference() で全ての要素が一致する場合、空の配列を返す", () => {
+    test("difference() should return an empty array when all elements match", () => {
         const arrA = new CoreArray<number>([1, 2, 3]);
         const arrB = new CoreArray<number>([1, 2, 3]);
         expect(arrA.difference(arrB).toArray()).toEqual([]);
     });
 
-    // **isSubset() のテスト**
-    test("isSubset() は配列が部分集合であるかを判定する", () => {
+    // **Tests for isSubset()**
+    test("isSubset() should determine if one array is a subset of another", () => {
         const arrA = new CoreArray<number>([1, 2]);
         const arrB = new CoreArray<number>([1, 2, 3, 4]);
         expect(arrA.isSubset(arrB)).toBe(true);
     });
 
-    test("isSubset() で部分集合でない場合 false を返す", () => {
+    test("isSubset() should return false when the array is not a subset", () => {
         const arrA = new CoreArray<number>([1, 5]);
         const arrB = new CoreArray<number>([1, 2, 3, 4]);
         expect(arrA.isSubset(arrB)).toBe(false);
     });
 
-    test("isSubset() で全く共通要素がない場合 false を返す", () => {
+    test("isSubset() should return false when there are no common elements", () => {
         const arrA = new CoreArray<number>([5, 6]);
         const arrB = new CoreArray<number>([1, 2, 3, 4]);
         expect(arrA.isSubset(arrB)).toBe(false);
     });
 
-    // **その他のメソッドのテスト**
-    test("unique() は重複要素を取り除く", () => {
+    // **Test for unique() method**
+    test("unique() should remove duplicate elements", () => {
         const result = CoreArray.unique([1, 2, 2, 3, 3, 3]);
         expect(result).toEqual([1, 2, 3]);
     });
 
-    test("map() は全要素に関数を適用する", () => {
+    test("map() should apply a function to all elements", () => {
         const result = CoreArray.map([1, 2, 3], x => x * 2);
         expect(result).toEqual([2, 4, 6]);
     });
 
-    test("fold() は全要素を畳み込む", () => {
+    test("fold() should reduce all elements", () => {
         const result = CoreArray.fold([1, 2, 3, 4], 0, (acc, val) => acc + val);
         expect(result).toBe(10);
     });
 
-    test("flatten() はネストされた配列を平坦化する", () => {
+    test("flatten() should flatten nested arrays", () => {
         const result = CoreArray.flatten([[1, 2], [3, 4], [5]]);
         expect(result).toEqual([1, 2, 3, 4, 5]);
     });
 
-    test("last() は配列の最後の要素を取得する", () => {
+    test("last() should get the last element of an array", () => {
         expect(CoreArray.last([1, 2, 3])).toBe(3);
     });
 
     /**
-     * パフォーマンステスト: Array.isArray vs constructor チェック
+     * Performance test: Array.isArray vs constructor check
      */
-    test("isArray のパフォーマンステスト", () => {
+    test("Performance test for isArray", () => {
         const N = 100000;
         const objects: any[] = [];
 
@@ -164,35 +164,35 @@ describe("CoreArray", () => {
     });
 
     /**
-     * appendTo のテスト
+     * Test for appendTo()
      */
-    test("appendTo() は配列を結合する", () => {
+    test("appendTo() should concatenate arrays", () => {
         const arr = [1, 2, 3];
         CoreArray.appendTo(arr, CoreArray.copy(arr));
         expect(arr).toEqual([1, 2, 3, 1, 2, 3]);
     });
 
     /**
-     * 配列の基本テスト
+     * Basic test for arrays
      */
-    test("配列の基本操作", () => {
+    test("Basic operations on arrays", () => {
         const arr = CoreArray.create<number>();
         CoreArray.appendTo(arr, CoreArray.from([1]));
         expect(CoreArray.last(arr)).toBe(1);
     });
 
     /**
-     * flatten のテスト
+     * Test for flatten()
      */
-    test("flatten() は多次元配列を平坦化する", () => {
+    test("flatten() should flatten multi-dimensional arrays", () => {
         const arr = [[1, 2, 3], [4]];
         expect(CoreArray.flatten(arr)).toEqual([1, 2, 3, 4]);
     });
 
     /**
-     * folding のテスト
+     * Test for folding
      */
-    test("fold() は畳み込み処理を正しく行う", () => {
+    test("fold() should correctly perform a reduction", () => {
         const testcase = (n: number) => {
             const result = -1 + CoreArray.fold(
                 CoreArray.unfold(n, i => i),
@@ -211,9 +211,9 @@ describe("CoreArray", () => {
     });
 
     /**
-     * every, some のテスト
+     * Tests for every() and some()
      */
-    test("every() と some() の動作確認", () => {
+    test("every() and some() should work correctly", () => {
         const arr = [1, 2, 3];
         expect(CoreArray.every(arr, x => x <= 3)).toBe(true);
         expect(CoreArray.every(arr, x => x < 3)).toBe(false);
@@ -222,9 +222,9 @@ describe("CoreArray", () => {
     });
 
     /**
-     * isArray のテスト
+     * Test for isArray()
      */
-    test("isArray() の動作確認", () => {
+    test("isArray() should work correctly", () => {
         expect(CoreArray.isArray([])).toBe(true);
         expect(CoreArray.isArray([1])).toBe(true);
         expect(CoreArray.isArray(Array.from(new Set([3])))).toBe(true);
@@ -234,14 +234,14 @@ describe("CoreArray", () => {
     });
 
     /**
-     * unique のテスト
+     * Tests for unique() and uniqueBy()
      */
-    test("unique() と uniqueBy() の動作確認", () => {
+    test("unique() and uniqueBy() should work correctly", () => {
         expect(CoreArray.unique([1, 2, 1, 2, 2, 1])).toEqual([1, 2]);
         expect(CoreArray.unique([])).toEqual([]);
         expect(CoreArray.uniqueBy([{ el: 1 }, { el: 1 }], o => o.el)).toEqual([{ el: 1 }]);
         expect(CoreArray.uniqueBy([], o => o)).toEqual([]);
 
-        console.log(CoreArray.unfold(10, i => i **2))
+        console.log(CoreArray.unfold(10, i => i ** 2));
     });
 });

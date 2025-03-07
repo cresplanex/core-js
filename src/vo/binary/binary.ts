@@ -124,4 +124,8 @@ export class BinaryValueFactory {
     toggleBit(bit: BinaryValueFactory): BinaryValueFactory {
         return BinaryValueFactory.toggleBit(this, bit)
     }
+
+    isZero(): boolean {
+        return this._innerData === 0
+    }
 }

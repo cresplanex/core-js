@@ -4,7 +4,7 @@
  * @module dom
  */
 
-import * as pair from './pair.js'
+import * as pair from '../structure/pair.js'
 import { CoreMap } from '../structure/map.js'
 
 /**
@@ -40,10 +40,10 @@ export const emitCustomEvent = (el: HTMLElement, name: string, opts: Object) => 
 
 /**
  * @param {Element} el
- * @param {Array<pair.Pair<string,string|boolean>>} attrs Array of key-value pairs
+ * @param {Array<pair.CorePair<string,string|boolean>>} attrs Array of key-value pairs
  * @return {Element}
  */
-export const setAttributes = (el: Element, attrs: Array<pair.Pair<string, string|boolean>>): Element => {
+export const setAttributes = (el: Element, attrs: Array<pair.CorePair<string, string|boolean>>): Element => {
     pair.forEach(attrs, (key, value) => {
         if (value === false) {
             el.removeAttribute(key)
@@ -113,31 +113,31 @@ export const removeEventListener = (el: EventTarget, name: string, f: EventListe
 
 /**
  * @param {Node} node
- * @param {Array<pair.Pair<string,EventListener>>} listeners
+ * @param {Array<pair.CorePair<string,EventListener>>} listeners
  * @return {Node}
  */
-export const addEventListeners = (node: Node, listeners: Array<pair.Pair<string, EventListener>>): Node => {
+export const addEventListeners = (node: Node, listeners: Array<pair.CorePair<string, EventListener>>): Node => {
     pair.forEach(listeners, (name, f) => addEventListener(node, name, f))
     return node
 }
 
 /**
  * @param {Node} node
- * @param {Array<pair.Pair<string,EventListener>>} listeners
+ * @param {Array<pair.CorePair<string,EventListener>>} listeners
  * @return {Node}
  */
-export const removeEventListeners = (node: Node, listeners: Array<pair.Pair<string, EventListener>>): Node => {
+export const removeEventListeners = (node: Node, listeners: Array<pair.CorePair<string, EventListener>>): Node => {
     pair.forEach(listeners, (name, f) => removeEventListener(node, name, f))
     return node
 }
 
 /**
  * @param {string} name
- * @param {Array<pair.Pair<string,string>|pair.Pair<string,boolean>>} attrs Array of key-value pairs
+ * @param {Array<pair.CorePair<string,string>|pair.CorePair<string,boolean>>} attrs Array of key-value pairs
  * @param {Array<Node>} children
  * @return {Element}
  */
-export const element = (name: string, attrs: Array<pair.Pair<string, string|boolean>> = [], children: Array<Node> = []): Element => {
+export const element = (name: string, attrs: Array<pair.CorePair<string, string|boolean>> = [], children: Array<Node> = []): Element => {
     const elm = createElement(name)
     if (!elm) {
         throw new Error(`Could not create element ${name}`)
@@ -167,16 +167,16 @@ export const canvas = (width: number, height: number) => {
 export const text = createTextNode
 
 /**
- * @param {pair.Pair<string,string>} pair
+ * @param {pair.CorePair<string,string>} pair
  */
-export const pairToStyleString = (pair: pair.Pair<string, string>) =>
+export const pairToStyleString = (pair: pair.CorePair<string, string>) =>
     `${pair.left}:${pair.right};`
 
 /**
- * @param {Array<pair.Pair<string,string>>} pairs
+ * @param {Array<pair.CorePair<string,string>>} pairs
  * @return {string}
  */
-export const pairsToStyleString = (pairs: Array<pair.Pair<string, string>>) =>
+export const pairsToStyleString = (pairs: Array<pair.CorePair<string, string>>) =>
     pairs.map(pairToStyleString).join('')
 
 /**

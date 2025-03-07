@@ -1,23 +1,13 @@
-/**
- * Utility module to work with time.
- *
- * @module time
- */
-
-import * as metric from './metric.js'
-import * as math from './math.js'
+import * as metric from './metric'
+import * as math from './math'
 
 /**
  * Return current time.
- *
- * @return {Date}
  */
 export const getDate = () => new Date()
 
 /**
  * Return current unix time.
- *
- * @return {number}
  */
 export const getUnixTime = Date.now
 

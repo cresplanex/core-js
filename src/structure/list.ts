@@ -1,37 +1,24 @@
+import { error } from '..'
 import { id } from '../utils/function'
-import * as error from '../utils/error'
 
 export class CoreListNode {
     next: this|null
     prev: this|null
     constructor () {
-        /**
-         * @type {this|null}
-         */
         this.next = null
-        /**
-         * @type {this|null}
-         */
         this.prev = null
     }
 }
-
 /**
  * @template {CoreListNode} N
  */
-export class CoreList<N extends CoreListNode> {
+export class CoreList<N extends CoreListNode = CoreListNode> {
     start: N | null
     end: N | null
     len: number
 
     constructor () {
-        /**
-         * @type {N | null}
-         */
         this.start = null
-        /**
-         * @type {N | null}
-         */
         this.end = null
         this.len = 0
     }
@@ -78,7 +65,7 @@ export class CoreList<N extends CoreListNode> {
         return node
     }
 
-    remove(node: CoreListNode): CoreListNode {
+    remove(node: N): N {
         return CoreList.remove(this, node)
     }
 
@@ -92,7 +79,7 @@ export class CoreList<N extends CoreListNode> {
      */
     static insertBetween<N extends CoreListNode>(queue: CoreList<N>, left: N | null, right: N | null, node: N): void {
         if (left != null && left.next !== right) {
-            throw error.unexpectedCase()
+            throw error.unexpectedCase("list node is not adjacent")
         }
         if (left) {
             left.next = node
@@ -109,7 +96,7 @@ export class CoreList<N extends CoreListNode> {
         queue.len++
     }
 
-    insertBetween(left: CoreListNode | null, right: CoreListNode | null, node: CoreListNode): void {
+    insertBetween(left: N | null, right: N | null, node: N): void {
         CoreList.insertBetween(this, left, right, node)
     }
 
@@ -127,7 +114,7 @@ export class CoreList<N extends CoreListNode> {
         CoreList.remove(queue, node)
     }
 
-    replace(node: CoreListNode, newNode: CoreListNode): void {
+    replace(node: N, newNode: N): void {
         CoreList.replace(this, node, newNode)
     }
 
@@ -141,7 +128,7 @@ export class CoreList<N extends CoreListNode> {
         CoreList.insertBetween(queue, queue.end, null, n)
     }
 
-    pushEnd(n: CoreListNode): void {
+    pushEnd(n: N): void {
         CoreList.pushEnd(this, n)
     }
 
@@ -155,7 +142,7 @@ export class CoreList<N extends CoreListNode> {
         CoreList.insertBetween(queue, null, queue.start, n)
     }
 
-    pushFront(n: CoreListNode): void {
+    pushFront(n: N): void {
         CoreList.pushFront(this, n)
     }
 
@@ -169,7 +156,7 @@ export class CoreList<N extends CoreListNode> {
         return queue.start ? CoreList.remove(queue, queue.start) : null
     }
 
-    popFront(): CoreListNode | null {
+    popFront(): N | null {
         return CoreList.popFront(this)
     }
 
@@ -183,7 +170,7 @@ export class CoreList<N extends CoreListNode> {
         return queue.end ? CoreList.remove(queue, queue.end) : null
     }
 
-    popEnd(): CoreListNode | null {
+    popEnd(): N | null {
         return CoreList.popEnd(this)
     }
 
@@ -205,7 +192,7 @@ export class CoreList<N extends CoreListNode> {
         return arr
     }
 
-    map<M>(f: (n: CoreListNode) => M): M[] {
+    map<M>(f: (n: N) => M): M[] {
         return CoreList.map(this, f)
     }
 
@@ -218,7 +205,7 @@ export class CoreList<N extends CoreListNode> {
         return CoreList.map(list, id)
     }
 
-    toArray(): CoreListNode[] {
+    toArray(): N[] {
         return CoreList.toArray(this)
     }
 
@@ -237,7 +224,7 @@ export class CoreList<N extends CoreListNode> {
         }
     }
 
-    forEach<M>(f: (n: CoreListNode) => M): void {
+    forEach<M>(f: (n: N) => M): void {
         CoreList.forEach(this, f)
     }
 }

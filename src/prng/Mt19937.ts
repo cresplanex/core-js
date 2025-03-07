@@ -1,23 +1,9 @@
-import { CoreBinary } from '../structure/binary'
-import * as math from '../utils/math'
+import { mathUtil } from '../utils'
+import { binary } from '../vo'
 import { Prng } from './prng'
 
 const N = 624
 const M = 397
-
-const twist = (u: number, v: number) => ((((u & 0x80000000) | (v & 0x7fffffff)) >>> 1) ^ ((v & 1) ? 0x9908b0df : 0))
-
-const nextState = (state: Uint32Array) => {
-    let p = 0
-    let j
-    for (j = N - M + 1; --j; p++) {
-        state[p] = state[p + M] ^ twist(state[p], state[p + 1])
-    }
-    for (j = M; --j; p++) {
-        state[p] = state[p + M - N] ^ twist(state[p], state[p + 1])
-    }
-    state[p] = state[p + M - N] ^ twist(state[p], state[0])
-}
 
 /**
  * This is a port of Shawn Cokus's implementation of the original Mersenne Twister algorithm (http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/CODES/MTARCOK/mt19937ar-cok.c).
@@ -32,8 +18,7 @@ const nextState = (state: Uint32Array) => {
  *
  * @public
  */
-export class Mt19937 implements Prng {
-    private seed: number
+export class Mt19937 extends Prng {
     private _state: Uint32Array
     private _i: number
 
@@ -41,15 +26,16 @@ export class Mt19937 implements Prng {
      * @param {number} seed Unsigned 32 bit number
      */
     constructor (seed: number) {
-        this.seed = seed
+        super()
+
         const state = new Uint32Array(N)
         state[0] = seed
         for (let i = 1; i < N; i++) {
-        state[i] = (math.imul(1812433253, (state[i - 1] ^ (state[i - 1] >>> 30))) + i) & CoreBinary.BITS32._value
+            state[i] = (mathUtil.imul(1812433253, (state[i - 1] ^ (state[i - 1] >>> 30))) + i) & binary.BITS32.value
         }
         this._state = state
         this._i = 0
-        nextState(this._state)
+        Mt19937.nextState(this._state)
     }
 
     /**
@@ -59,15 +45,31 @@ export class Mt19937 implements Prng {
      */
     next () {
         if (this._i === N) {
-        // need to compute a new state
-        nextState(this._state)
-        this._i = 0
+            // need to compute a new state
+            Mt19937.nextState(this._state)
+            this._i = 0
         }
         let y = this._state[this._i++]
         y ^= (y >>> 11)
         y ^= (y << 7) & 0x9d2c5680
         y ^= (y << 15) & 0xefc60000
         y ^= (y >>> 18)
-        return (y >>> 0) / (CoreBinary.BITS32._value + 1)
+        return (y >>> 0) / (binary.BITS32.value + 1)
+    }
+
+    private static twist(u: number, v: number) {
+        return ((((u & 0x80000000) | (v & 0x7fffffff)) >>> 1) ^ ((v & 1) ? 0x9908b0df : 0))
+    }
+
+    private static nextState(state: Uint32Array) {
+        let p = 0
+        let j
+        for (j = N - M + 1; --j; p++) {
+            state[p] = state[p + M] ^ Mt19937.twist(state[p], state[p + 1])
+        }
+        for (j = M; --j; p++) {
+            state[p] = state[p + M - N] ^ Mt19937.twist(state[p], state[p + 1])
+        }
+        state[p] = state[p + M - N] ^ Mt19937.twist(state[p], state[0])
     }
 }

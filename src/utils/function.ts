@@ -1,5 +1,5 @@
+import * as objectUtil from "./object";
 import { CoreArray } from "../structure/array";
-import { CoreObject } from "../structure/object";
 
 /**
  * Calls all functions in `fs` with args. Only throws after all functions were called.
@@ -35,7 +35,7 @@ export const equalityFlat = <T>(a: Array<T> | object, b: Array<T> | object) =>
         a.constructor === b.constructor &&
         ((CoreArray.isArray(a) &&
             CoreArray.equalFlat(a, b as Array<T>)) ||
-            (typeof a === 'object' && CoreObject.equalFlat(a, b))))
+            (typeof a === 'object' && objectUtil.equalFlat(a, b))))
 export const equalityDeep = (a: any, b: any) => {
     if (a == null || b == null) {
         return equalityStrict(a, b)
@@ -50,7 +50,6 @@ export const equalityDeep = (a: any, b: any) => {
         case ArrayBuffer:
             a = new Uint8Array(a)
             b = new Uint8Array(b)
-        // eslint-disable-next-line no-fallthrough
         case Uint8Array: {
             if (a.byteLength !== b.byteLength) {
                 return false
@@ -85,14 +84,12 @@ export const equalityDeep = (a: any, b: any) => {
             break
         }
         case Object:
-            const aObj = new CoreObject(a)
-            const bObj = new CoreObject(b)
-            if (aObj.size() !== bObj.size()) {
+            if (objectUtil.size(a) !== objectUtil.size(b)) {
                 return false
             }
             for (const key in a) {
                 if (
-                    !CoreObject.hasProperty(a, key) ||
+                    !objectUtil.hasProperty(a, key) ||
                     !equalityDeep(a[key], b[key])
                 ) {
                     return false
@@ -115,7 +112,7 @@ export const equalityDeep = (a: any, b: any) => {
     return true
 }
 // @ts-ignore
-export const isOneOf = <V, OPTS>(value: V, options: Array<OPTS>) => options.includes(value)
+export const isOneOf = <V, OPTS>(value: V|undefined, options: Array<OPTS>) => options.includes(value)
 export const isArray = CoreArray.isArray
 export const isString = (s: any): s is string => s && s.constructor === String
 export const isNumber = (n: any): n is number =>

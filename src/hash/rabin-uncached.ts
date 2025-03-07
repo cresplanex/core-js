@@ -5,8 +5,7 @@
  * @module rabin-uncached
  */
 
-import * as math from '../utils/math'
-import * as buffer from '../utils/buffer'
+import { bufferUtil, mathUtil } from "../utils"
 
 export class RabinUncachedEncoder {
     m: Uint8Array
@@ -37,7 +36,7 @@ export class RabinUncachedEncoder {
      * @param {Uint8Array} cs
      */
     add (cs: Uint8Array) {
-        const copyLen = math.min(this.blen, cs.byteLength)
+        const copyLen = mathUtil.min(this.blen, cs.byteLength)
         // copy from right to left until max is reached
         for (let i = 0; i < copyLen; i++) {
         this.bs[(this.bpos + this.blen - i - 1) % this.blen] ^= cs[cs.byteLength - i - 1]
@@ -56,7 +55,7 @@ export class RabinUncachedEncoder {
         // mod
         for (let i = 7; i >= 0; i--) {
         if (((this.bs[this.bpos] >>> i) & 1) === 1) {
-            this.add(buffer.shiftNBitsLeft(this.m, i))
+            this.add(bufferUtil.shiftNBitsLeft(this.m, i))
         }
         }
         // if (this.bs[this.bpos] !== 0) { error.unexpectedCase() }

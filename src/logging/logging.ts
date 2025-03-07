@@ -6,7 +6,7 @@
 
 import * as env from '../utils/environment'
 import { CoreSet } from '../structure/set'
-import * as pair from '../utils/pair'
+import * as pair from '../structure/pair'
 import * as dom from '../utils/dom'
 import * as json from '../utils/json'
 import { CoreMap } from '../structure/map'
@@ -18,18 +18,18 @@ import { CoreSymbol } from '../structure/symbol'
 export { BOLD, UNBOLD, BLUE, GREY, GREEN, RED, PURPLE, ORANGE, UNCOLOR } from './common'
 
 /**
- * @type {Object<Symbol,pair.Pair<string,string>>}
+ * @type {Object<Symbol,pair.CorePair<string,string>>}
  */
 const _browserStyleMap = {
-  [common.BOLD.value]: pair.Pair.create('font-weight', 'bold'),
-  [common.UNBOLD.value]: pair.Pair.create('font-weight', 'normal'),
-  [common.BLUE.value]: pair.Pair.create('color', 'blue'),
-  [common.GREEN.value]: pair.Pair.create('color', 'green'),
-  [common.GREY.value]: pair.Pair.create('color', 'grey'),
-  [common.RED.value]: pair.Pair.create('color', 'red'),
-  [common.PURPLE.value]: pair.Pair.create('color', 'purple'),
-  [common.ORANGE.value]: pair.Pair.create('color', 'orange'), // not well supported in chrome when debugging node with inspector - TODO: deprecate
-  [common.UNCOLOR.value]: pair.Pair.create('color', 'black')
+  [common.BOLD.value]: pair.CorePair.create('font-weight', 'bold'),
+  [common.UNBOLD.value]: pair.CorePair.create('font-weight', 'normal'),
+  [common.BLUE.value]: pair.CorePair.create('color', 'blue'),
+  [common.GREEN.value]: pair.CorePair.create('color', 'green'),
+  [common.GREY.value]: pair.CorePair.create('color', 'grey'),
+  [common.RED.value]: pair.CorePair.create('color', 'red'),
+  [common.PURPLE.value]: pair.CorePair.create('color', 'purple'),
+  [common.ORANGE.value]: pair.CorePair.create('color', 'orange'), // not well supported in chrome when debugging node with inspector - TODO: deprecate
+  [common.UNCOLOR.value]: pair.CorePair.create('color', 'black')
 }
 
 /**
@@ -207,7 +207,7 @@ const _computeLineSpans = (args: Array<string|CoreSymbol|Symbol|Object|number>):
           throw new Error('Could not create text element')
         }
         const span = dom.element('span', [
-          pair.Pair.create('style', dom.mapToStyleString(currentStyle.value))
+          pair.CorePair.create('style', dom.mapToStyleString(currentStyle.value))
         ], [textEl])
         if (span.innerHTML === '') {
           span.innerHTML = '&nbsp;'
@@ -273,16 +273,16 @@ export class VConsole {
         throw new Error('Could not create text element')
       }
       const triangleDown = dom.element('span', [
-        pair.Pair.create('hidden', collapsed),
-        pair.Pair.create('style', 'color:grey;font-size:120%;')
+        pair.CorePair.create('hidden', collapsed),
+        pair.CorePair.create('style', 'color:grey;font-size:120%;')
       ], [textElDown])
       const triangleRight = dom.element('span', [
-        pair.Pair.create('hidden', !collapsed),
-        pair.Pair.create('style', 'color:grey;font-size:125%;')
+        pair.CorePair.create('hidden', !collapsed),
+        pair.CorePair.create('style', 'color:grey;font-size:125%;')
       ], [textElRight])
       const content = dom.element(
         'div',
-        [pair.Pair.create(
+        [pair.CorePair.create(
           'style',
           `${lineStyle};padding-left:${this.depth * 10}px`
         )],
@@ -291,7 +291,7 @@ export class VConsole {
         )
       )
       const nextContainer = dom.element('div', [
-        pair.Pair.create('hidden', collapsed)
+        pair.CorePair.create('hidden', collapsed)
       ])
       const nextLine = dom.element('div', [], [content, nextContainer])
       dom.append(this.ccontainer, [nextLine])
@@ -330,7 +330,7 @@ export class VConsole {
     eventloop.enqueue(() => {
       dom.append(this.ccontainer, [
         dom.element('div', [
-          pair.Pair.create(
+          pair.CorePair.create(
             'style',
             `${lineStyle};padding-left:${this.depth * 10}px`
           )
@@ -354,8 +354,8 @@ export class VConsole {
     eventloop.enqueue(() => {
       dom.append(this.ccontainer, [
         dom.element('img', [
-          pair.Pair.create('src', url),
-          pair.Pair.create('height', `${math.round(height * 1.5)}px`)
+          pair.CorePair.create('src', url),
+          pair.CorePair.create('height', `${math.round(height * 1.5)}px`)
         ])
       ])
     })

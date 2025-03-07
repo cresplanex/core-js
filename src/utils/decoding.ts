@@ -26,12 +26,12 @@
  * @module decoding
  */
 
-import { CoreBinary } from '../structure/binary.js'
-import * as math from './math.js'
-import * as number from './number.js'
-import * as string from './string.js'
-import * as error from './error.js'
-import * as encoding from './encoding.js'
+import { CoreBinary } from '../structure/binary'
+import * as math from './math'
+import * as number from './number'
+import * as string from './string'
+import * as error from './error'
+import * as encoding from './encoding'
 
 const errorUnexpectedEndOfArray = error.create('Unexpected end of array')
 const errorIntegerOutOfRange = error.create('Integer out of Range')

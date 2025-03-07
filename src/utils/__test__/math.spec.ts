@@ -1,204 +1,253 @@
-// decimalmath.test.ts
-import Decimal from "decimal.js";
-import * as math from "../math";
+import {
+    abs,
+    ceil,
+    floor,
+    round,
+    max,
+    min,
+    pow,
+    sqrt,
+    cbrt,
+    exp,
+    log,
+    log10,
+    log2,
+    sin,
+    cos,
+    tan,
+    asin,
+    acos,
+    atan,
+    atan2,
+    sinh,
+    cosh,
+    tanh,
+    asinh,
+    acosh,
+    atanh,
+    imul,
+    sign,
+    trunc,
+    clamp,
+    lerp,
+    inverseLerp,
+    smoothStep,
+    smootherStep,
+    isPowerOfTwo,
+    nextPowerOfTwo,
+    prevPowerOfTwo,
+    mod,
+    fract,
+    degToRad
+} from '../math'; // Adjust the import path as needed
 
-describe("Decimal.js 関数群のテスト", () => {
-    test("add: 1 + 2 = 3", () => {
-        // const a = new Decimal(1);
-        // const b = new Decimal(2);
-        // math.add(1, 2);
-        math.add(1, 2);
-        const result = math.add(1, 2);
-        expect(result).toBe(3);
+describe("Math Utility Functions", () => {
+    test("abs should return absolute value", () => {
+        expect(abs(-5)).toBe(5);
+        expect(abs(5)).toBe(5);
     });
 
-    // test("sub: 5 - 2 = 3", () => {
-    //     const result = math.sub(new Decimal(5), new Decimal(2));
-    //     expect(result.toString()).toBe(new Decimal(3).toString());
-    // });
+    test("ceil should return the smallest integer greater than or equal to the given value", () => {
+        expect(ceil(4.2)).toBe(5);
+        expect(ceil(4)).toBe(4);
+    });
 
-    // test("mul: 3 * 2 = 6", () => {
-    //     const result = math.mul(new Decimal(3), new Decimal(2));
-    //     expect(result.toString()).toBe(new Decimal(6).toString());
-    // });
+    test("floor should return the largest integer less than or equal to the given value", () => {
+        expect(floor(4.8)).toBe(4);
+        expect(floor(4)).toBe(4);
+    });
 
-    // test("div: 6 / 2 = 3", () => {
-    //     const result = math.div(new Decimal(6), new Decimal(2));
-    //     expect(result.toString()).toBe(new Decimal(3).toString());
-    // });
+    test("round should round the value to the nearest integer", () => {
+        expect(round(4.2)).toBe(4);
+        expect(round(4.5)).toBe(5);
+    });
 
-    // test("mod: 5 mod 2 = 1", () => {
-    //     const result = math.mod(new Decimal(5), new Decimal(2));
-    //     expect(result.toString()).toBe(new Decimal(1).toString());
-    // });
+    test("max should return the maximum value", () => {
+        expect(max(1, 3, 2, -5)).toBe(3);
+    });
 
-    // test("pow: 2^3 = 8", () => {
-    //     const result = math.pow(new Decimal(2), new Decimal(3));
-    //     expect(result.toString()).toBe(new Decimal(8).toString());
-    // });
+    test("min should return the minimum value", () => {
+        expect(min(1, 3, 2, -5)).toBe(-5);
+    });
 
-    // // test("sum: [1,2,3] = 6", () => {
-    // //     const result = math.sum([1, 2, 3]);
-    // //     expect(result.toString()).toBe(new Decimal(6).toString());
-    // // });
+    test("pow should compute the power correctly", () => {
+        expect(pow(2, 3)).toBe(8);
+        expect(pow(5, 0)).toBe(1);
+    });
 
-    // test("abs: abs(-5) = 5", () => {
-    //     const result = math.abs(new Decimal(-5));
-    //     expect(result.toString()).toBe(new Decimal(5).toString());
-    // });
+    test("sqrt should compute the square root", () => {
+        expect(sqrt(16)).toBe(4);
+        expect(sqrt(2)).toBeCloseTo(Math.SQRT2, 5);
+    });
 
-    // test("ceil: ceil(1.1) = 2", () => {
-    //     const result = math.ceil(new Decimal(1.1));
-    //     expect(result.toString()).toBe(new Decimal(2).toString());
-    // });
+    test("cbrt should compute the cube root", () => {
+        expect(cbrt(27)).toBe(3);
+        expect(cbrt(-27)).toBe(-3);
+    });
 
-    // test("floor: floor(1.9) = 1", () => {
-    //     const result = math.floor(new Decimal(1.9));
-    //     expect(result.toString()).toBe(new Decimal(1).toString());
-    // });
+    test("exp should compute the exponential", () => {
+        expect(exp(1)).toBeCloseTo(Math.E, 5);
+    });
 
-    // test("round: round(1.5) = 2", () => {
-    //     const result = math.round(new Decimal(1.5));
-    //     expect(result.toString()).toBe(new Decimal(2).toString());
-    // });
+    test("log should compute the natural logarithm", () => {
+        expect(log(Math.E)).toBeCloseTo(1, 5);
+    });
 
-    // test("sqrt: sqrt(4) = 2", () => {
-    //     const result = math.sqrt(new Decimal(4));
-    //     expect(result.toString()).toBe(new Decimal(2).toString());
-    // });
+    test("log10 should compute the base-10 logarithm", () => {
+        expect(log10(1000)).toBeCloseTo(3, 5);
+    });
 
-    // test("ln: ln(e) ≒ 1", () => {
-    //     const result = math.ln(new Decimal(Math.E));
-    //     // 誤差を許容範囲で比較する
-    //     expect(Number(result.toString())).toBeCloseTo(1, 5);
-    // });
+    test("log2 should compute the base-2 logarithm", () => {
+        expect(log2(8)).toBeCloseTo(3, 5);
+    });
 
-    // test("log: log(100, 10) = 2", () => {
-    //     // 第二引数として底が渡せるかはライブラリのバージョンに依存するので注意
-    //     const result = math.log(new Decimal(100), new Decimal(10));
-    //     expect(Number(result.toString())).toBeCloseTo(2, 5);
-    // });
+    test("sin should compute the sine", () => {
+        expect(sin(0)).toBeCloseTo(0, 5);
+        expect(sin(Math.PI / 2)).toBeCloseTo(1, 5);
+    });
 
-    // test("log2: log2(8) = 3", () => {
-    //     const result = math.log2(new Decimal(8));
-    //     expect(Number(result.toString())).toBeCloseTo(3, 5);
-    // });
+    test("cos should compute the cosine", () => {
+        expect(cos(0)).toBeCloseTo(1, 5);
+        expect(cos(Math.PI)).toBeCloseTo(-1, 5);
+    });
 
-    // test("log10: log10(1000) = 3", () => {
-    //     const result = math.log10(new Decimal(1000));
-    //     expect(Number(result.toString())).toBeCloseTo(3, 5);
-    // });
+    test("tan should compute the tangent", () => {
+        expect(tan(0)).toBeCloseTo(0, 5);
+    });
 
-    // test("exp: exp(1) = e", () => {
-    //     const result = math.exp(new Decimal(1));
-    //     expect(Number(result.toString())).toBeCloseTo(Math.E, 5);
-    // });
+    test("asin should compute the arcsine", () => {
+        expect(asin(0)).toBeCloseTo(0, 5);
+        expect(asin(1)).toBeCloseTo(Math.PI / 2, 5);
+    });
 
-    // test("clamp: 値を範囲内に収める", () => {
-    //     expect(math.clamp(new Decimal(5), new Decimal(1), new Decimal(10)).toString()).toBe(new Decimal(5).toString());
-    //     expect(math.clamp(new Decimal(0), new Decimal(1), new Decimal(10)).toString()).toBe(new Decimal(1).toString());
-    //     expect(math.clamp(new Decimal(11), new Decimal(1), new Decimal(10)).toString()).toBe(new Decimal(10).toString());
-    // });
+    test("acos should compute the arccosine", () => {
+        expect(acos(1)).toBeCloseTo(0, 5);
+        expect(acos(0)).toBeCloseTo(Math.PI / 2, 5);
+    });
 
-    // test("min: 最小値を返す", () => {
-    //     const result = math.min(new Decimal(3), new Decimal(1), new Decimal(2));
-    //     expect(result.toString()).toBe(new Decimal(1).toString());
-    // });
+    test("atan should compute the arctangent", () => {
+        expect(atan(1)).toBeCloseTo(Math.PI / 4, 5);
+    });
 
-    // test("max: 最大値を返す", () => {
-    //     const result = math.max(new Decimal(3), new Decimal(1), new Decimal(2));
-    //     expect(result.toString()).toBe(new Decimal(3).toString());
-    // });
+    test("atan2 should compute the arctangent of y/x", () => {
+        expect(atan2(1, 1)).toBeCloseTo(Math.PI / 4, 5);
+        expect(atan2(0, -1)).toBeCloseTo(Math.PI, 5);
+    });
 
-    // test("trunc: trunc(1.9) = 1", () => {
-    //     const result = math.trunc(new Decimal(1.9));
-    //     expect(result.toString()).toBe(new Decimal(1).toString());
-    // });
+    test("sinh should compute the hyperbolic sine", () => {
+        expect(sinh(0)).toBeCloseTo(0, 5);
+    });
 
-    // test("cbrt: cbrt(8) = 2", () => {
-    //     const result = math.cbrt(new Decimal(8));
-    //     expect(result.toString()).toBe(new Decimal(2).toString());
-    // });
+    test("cosh should compute the hyperbolic cosine", () => {
+        expect(cosh(0)).toBeCloseTo(1, 5);
+    });
 
-    // test("hypot: hypot(3,4) = 5", () => {
-    //     const result = math.hypot(new Decimal(3), new Decimal(4));
-    //     expect(Number(result.toString())).toBeCloseTo(5, 5);
-    // });
+    test("tanh should compute the hyperbolic tangent", () => {
+        expect(tanh(0)).toBeCloseTo(0, 5);
+    });
 
-    // test("sign: sign(-10) = -1", () => {
-    //     const result = math.sign(new Decimal(-10));
-    //     expect(result.toString()).toBe(new Decimal(-1).toString());
-    // });
+    test("asinh should compute the inverse hyperbolic sine", () => {
+        expect(asinh(0)).toBeCloseTo(0, 5);
+    });
 
-    // test("cos: cos(0) = 1", () => {
-    //     const result = math.cos(new Decimal(0));
-    //     expect(Number(result.toString())).toBeCloseTo(1, 5);
-    // });
+    test("acosh should compute the inverse hyperbolic cosine", () => {
+        // acosh is defined for values >= 1
+        expect(acosh(1)).toBeCloseTo(0, 5);
+    });
 
-    // test("sin: sin(0) = 0", () => {
-    //     const result = math.sin(new Decimal(0));
-    //     expect(Number(result.toString())).toBeCloseTo(0, 5);
-    // });
+    test("atanh should compute the inverse hyperbolic tangent", () => {
+        // atanh is defined for values in (-1, 1)
+        expect(atanh(0)).toBeCloseTo(0, 5);
+    });
 
-    // test("tan: tan(0) = 0", () => {
-    //     const result = math.tan(new Decimal(0));
-    //     expect(Number(result.toString())).toBeCloseTo(0, 5);
-    // });
+    test("imul should perform C-like 32-bit multiplication", () => {
+        expect(imul(2, 3)).toBe(6);
+        // Check negative values as well
+        expect(imul(-2, 3)).toBe(-6);
+    });
 
-    // test("acos: acos(1) = 0", () => {
-    //     const result = math.acos(new Decimal(1));
-    //     expect(Number(result.toString())).toBeCloseTo(0, 5);
-    // });
+    test("sign should return the sign of a number", () => {
+        expect(sign(10)).toBe(1);
+        expect(sign(-10)).toBe(-1);
+        expect(sign(0)).toBe(0);
+    });
 
-    // test("asin: asin(0) = 0", () => {
-    //     const result = math.asin(new Decimal(0));
-    //     expect(Number(result.toString())).toBeCloseTo(0, 5);
-    // });
+    test("trunc should truncate the fractional part", () => {
+        expect(trunc(4.9)).toBe(4);
+        expect(trunc(-4.9)).toBe(-4);
+    });
 
-    // test("atan: atan(1) ≒ π/4", () => {
-    //     const result = math.atan(new Decimal(1));
-    //     expect(Number(result.toString())).toBeCloseTo(Math.PI / 4, 5);
-    // });
+    test("clamp should constrain a value within the given bounds", () => {
+        expect(clamp(5, 0, 10)).toBe(5);
+        expect(clamp(-5, 0, 10)).toBe(0);
+        expect(clamp(15, 0, 10)).toBe(10);
+    });
 
-    // test("atan2: atan2(1,1) ≒ π/4", () => {
-    //     const result = math.atan2(new Decimal(1), new Decimal(1));
-    //     expect(Number(result.toString())).toBeCloseTo(Math.PI / 4, 5);
-    // });
+    test("lerp should interpolate between two values", () => {
+        expect(lerp(0, 10, 0)).toBe(0);
+        expect(lerp(0, 10, 1)).toBe(10);
+        expect(lerp(0, 10, 0.5)).toBeCloseTo(5, 5);
+    });
 
-    // test("cosh: cosh(0) = 1", () => {
-    //     const result = math.cosh(new Decimal(0));
-    //     expect(Number(result.toString())).toBeCloseTo(1, 5);
-    // });
+    test("inverseLerp should compute the interpolation factor for a value", () => {
+        expect(inverseLerp(0, 10, 0)).toBe(0);
+        expect(inverseLerp(0, 10, 10)).toBe(1);
+        expect(inverseLerp(0, 10, 5)).toBeCloseTo(0.5, 5);
+    });
 
-    // test("sinh: sinh(0) = 0", () => {
-    //     const result = math.sinh(new Decimal(0));
-    //     expect(Number(result.toString())).toBeCloseTo(0, 5);
-    // });
+    test("smoothStep should perform smooth step interpolation", () => {
+        // At the boundaries, should return 0 and 1 respectively
+        expect(smoothStep(0, 1, -0.5)).toBe(0);
+        expect(smoothStep(0, 1, 1.5)).toBe(1);
+        // Middle value should be around 0.5 (nonlinear)
+        const mid = smoothStep(0, 1, 0.5);
+        expect(mid).toBeGreaterThan(0);
+        expect(mid).toBeLessThan(1);
+    });
 
-    // test("tanh: tanh(0) = 0", () => {
-    //     const result = math.tanh(new Decimal(0));
-    //     expect(Number(result.toString())).toBeCloseTo(0, 5);
-    // });
+    test("smootherStep should perform smoother step interpolation", () => {
+        // At the boundaries, should return 0 and 1 respectively
+        expect(smootherStep(0, 1, -0.5)).toBe(0);
+        expect(smootherStep(0, 1, 1.5)).toBe(1);
+        // Middle value should be between 0 and 1
+        const mid = smootherStep(0, 1, 0.5);
+        expect(mid).toBeGreaterThan(0);
+        expect(mid).toBeLessThan(1);
+    });
 
-    // test("acosh: acosh(1) = 0", () => {
-    //     const result = math.acosh(new Decimal(1));
-    //     expect(Number(result.toString())).toBeCloseTo(0, 5);
-    // });
+    test("isPowerOfTwo should correctly identify powers of two", () => {
+        expect(isPowerOfTwo(2)).toBe(true);
+        expect(isPowerOfTwo(4)).toBe(true);
+        expect(isPowerOfTwo(3)).toBe(false);
+        expect(isPowerOfTwo(1)).toBe(true);
+    });
 
-    // test("asinh: asinh(0) = 0", () => {
-    //     const result = math.asinh(new Decimal(0));
-    //     expect(Number(result.toString())).toBeCloseTo(0, 5);
-    // });
+    test("nextPowerOfTwo should return the next power of two", () => {
+        expect(nextPowerOfTwo(3)).toBe(4);
+        expect(nextPowerOfTwo(4)).toBe(4);
+        expect(nextPowerOfTwo(5)).toBe(8);
+    });
 
-    // test("atanh: atanh(0) = 0", () => {
-    //     const result = math.atanh(new Decimal(0));
-    //     expect(Number(result.toString())).toBeCloseTo(0, 5);
-    // });
+    test("prevPowerOfTwo should return the previous power of two", () => {
+        expect(prevPowerOfTwo(3)).toBe(2);
+        expect(prevPowerOfTwo(4)).toBe(4);
+        expect(prevPowerOfTwo(5)).toBe(4);
+    });
 
-    // test("random: 0以上1未満のランダム値", () => {
-    //     const result = math.random();
-    //     const num = Number(result.toString());
-    //     expect(num).toBeGreaterThanOrEqual(0);
-    //     expect(num).toBeLessThan(1);
-    // });
+    test("mod should compute the modulus correctly (handling negatives)", () => {
+        expect(mod(5, 3)).toBe(2);
+        expect(mod(-5, 3)).toBe(1);
+        expect(mod(5, -3)).toBe(-1);
+    });
+
+    test("fract should return the fractional part of a number", () => {
+        expect(fract(4.75)).toBeCloseTo(0.75, 5);
+        expect(fract(-4.75)).toBeCloseTo(0.25, 5); // since -4.75 => -4 + (-0.75) then fract = 1 - 0.75 = 0.25
+    });
+
+    test("degToRad should convert degrees to radians", () => {
+        expect(degToRad(0)).toBeCloseTo(0, 5);
+        expect(degToRad(180)).toBeCloseTo(Math.PI, 5);
+        expect(degToRad(360)).toBeCloseTo(2 * Math.PI, 5);
+    });
 });

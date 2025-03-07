@@ -1,20 +1,16 @@
-import { CoreBinary } from "../structure/binary"
+import { binary } from "../vo"
 import { Prng } from "./prng"
 
 /**
  * Xorshift32 is a very simple but elegang PRNG with a period of `2^32-1`.
  */
-export class Xorshift32 implements Prng {
-    private seed: number
+export class Xorshift32 extends Prng {
     private _state: number
     /**
      * @param {number} seed Unsigned 32 bit number
      */
     constructor (seed: number) {
-        this.seed = seed
-        /**
-         * @type {number}
-         */
+        super()
         this._state = seed
     }
 
@@ -29,6 +25,6 @@ export class Xorshift32 implements Prng {
         x ^= x >> 17
         x ^= x << 5
         this._state = x
-        return (x >>> 0) / (CoreBinary.BITS32 + 1)
+        return (x >>> 0) / (binary.BITS32.value + 1)
     }
 }

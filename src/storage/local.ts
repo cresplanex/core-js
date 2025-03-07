@@ -20,14 +20,19 @@ export const varStorage = _localStorage
 /**
  * A polyfill for `addEventListener('storage', event => {..})` that does nothing if the polyfill is being used.
  */
-export const onChange = (eventHandler: (this: Window, ev: WindowEventMap["storage"]) => any, options?: boolean | AddEventListenerOptions) => {
-    return usePolyfill || addEventListener('storage', eventHandler)
+export const onChange = (
+    eventHandler: (this: Window, ev: WindowEventMap["storage"]) => any, 
+    options?: boolean | AddEventListenerOptions
+) => {
+    return usePolyfill || addEventListener('storage', eventHandler, options)
 }
 
 /**
  * A polyfill for `removeEventListener('storage', event => {..})` that does nothing if the polyfill is being used.
  */
-/* c8 ignore next */
-export const offChange = (eventHandler: (this: Window, ev: WindowEventMap["storage"]) => any, options?: boolean | EventListenerOptions) => {
-    return usePolyfill || removeEventListener('storage', eventHandler)
+export const offChange = (
+    eventHandler: (this: Window, ev: WindowEventMap["storage"]) => any, 
+    options?: boolean | EventListenerOptions
+) => {
+    return usePolyfill || removeEventListener('storage', eventHandler, options)
 }

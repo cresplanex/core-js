@@ -4,12 +4,13 @@
  * @module buffer
  */
 
-import * as string from './string.js'
-import * as env from './environment.js'
-import { CoreArray } from '../structure/array.js'
-import * as math from './math.js'
-import * as encoding from './encoding.js'
-import * as decoding from './decoding.js'
+import * as string from './string'
+import * as env from './environment'
+import { CoreArray } from '../structure/array'
+import * as math from './math'
+import * as encoding from './encoding'
+import * as decoding from './decoding'
+import { numberUtil } from '.'
 
 /**
  * @param {number} len
@@ -38,12 +39,11 @@ export const createUint8ArrayFromArrayBuffer = (buffer: ArrayBuffer) =>
  * @param {Uint8Array} bytes
  * @return {string}
  */
-const toBase64Browser = (bytes: Uint8Array) => {
+const toBase64Browser = (bytes: Uint8Array): string => {
     let s = ''
     for (let i = 0; i < bytes.byteLength; i++) {
         s += string.fromCharCode(bytes[i])
     }
-    // eslint-disable-next-line no-undef
     return btoa(s)
 }
 
@@ -51,15 +51,14 @@ const toBase64Browser = (bytes: Uint8Array) => {
  * @param {Uint8Array} bytes
  * @return {string}
  */
-const toBase64Node = (bytes: Uint8Array) =>
+const toBase64Node = (bytes: Uint8Array): string =>
     Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString('base64')
 
 /**
  * @param {string} s
  * @return {Uint8Array}
  */
-const fromBase64Browser = (s: string) => {
-    // eslint-disable-next-line no-undef
+const fromBase64Browser = (s: string): Uint8Array => {
     const a = atob(s)
     const bytes = createUint8ArrayFromLen(a.length)
     for (let i = 0; i < a.length; i++) {
@@ -71,28 +70,26 @@ const fromBase64Browser = (s: string) => {
 /**
  * @param {string} s
  */
-const fromBase64Node = (s: string) => {
+const fromBase64Node = (s: string): Uint8Array => {
     const buf = Buffer.from(s, 'base64')
     return createUint8ArrayViewFromArrayBuffer(buf.buffer, buf.byteOffset, buf.byteLength)
 }
 
-/* c8 ignore next */
 export const toBase64 = env.isBrowser ? toBase64Browser : toBase64Node
 
-/* c8 ignore next */
 export const fromBase64 = env.isBrowser ? fromBase64Browser : fromBase64Node
 
 /**
  * Implements base64url - see https://datatracker.ietf.org/doc/html/rfc4648#section-5
  * @param {Uint8Array} buf
  */
-export const toBase64UrlEncoded = (buf: Uint8Array) =>
+export const toBase64UrlEncoded = (buf: Uint8Array): string =>
     toBase64(buf).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 
 /**
  * @param {string} base64
  */
-export const fromBase64UrlEncoded = (base64: string) =>
+export const fromBase64UrlEncoded = (base64: string): Uint8Array =>
     fromBase64(base64.replace(/-/g, '+').replace(/_/g, '/'))
 
 /**
@@ -100,7 +97,7 @@ export const fromBase64UrlEncoded = (base64: string) =>
  *
  * @param {Uint8Array} buf
  */
-export const toHexString = (buf: Uint8Array) =>
+export const toHexString = (buf: Uint8Array): string =>
     CoreArray.from(buf).map(b => b.toString(16).padStart(2, '0')).join('')
 
 /**
@@ -112,7 +109,7 @@ export const fromHexString = (hex: string) => {
     const hlen = hex.length
     const buf = new Uint8Array(math.ceil(hlen / 2))
     for (let i = 0; i < hlen; i += 2) {
-        buf[buf.length - i / 2 - 1] = Number.parseInt(hex.slice(hlen - i - 2, hlen - i), 16)
+        buf[buf.length - i / 2 - 1] = numberUtil.parseInt(hex.slice(hlen - i - 2, hlen - i), 16)
     }
     return buf
 }
@@ -129,38 +126,38 @@ export const copyUint8Array = (uint8Array: Uint8Array) => {
     return newBuf
 }
 
-/**
- * Encode anything as a UInt8Array. It's a pun on typescripts's `any` type.
- * See encoding.writeAny for more information.
- *
- * @param {any} data
- * @return {Uint8Array}
- */
-export const encodeAny = (data: any) =>
-  encoding.encode(encoder => encoder.writeAny(data))
+// /**
+//  * Encode anything as a UInt8Array. It's a pun on typescripts's `any` type.
+//  * See encoding.writeAny for more information.
+//  *
+//  * @param {any} data
+//  * @return {Uint8Array}
+//  */
+// export const encodeAny = (data: any) =>
+//   encoding.encode(encoder => encoder.writeAny(data))
 
-/**
- * Decode an any-encoded value.
- *
- * @param {Uint8Array} buf
- * @return {any}
- */
-export const decodeAny = (buf: Uint8Array) =>
-    decoding.CoreDecoder.readAny(decoding.CoreDecoder.create(buf))
+// /**
+//  * Decode an any-encoded value.
+//  *
+//  * @param {Uint8Array} buf
+//  * @return {any}
+//  */
+// export const decodeAny = (buf: Uint8Array) =>
+//     decoding.CoreDecoder.readAny(decoding.CoreDecoder.create(buf))
 
-/**
- * Shift Byte Array {N} bits to the left. Does not expand byte array.
- *
- * @param {Uint8Array} bs
- * @param {number} N should be in the range of [0-7]
- */
-export const shiftNBitsLeft = (bs: Uint8Array, N: number) => {
-    if (N === 0) return bs
-    bs = new Uint8Array(bs)
-    bs[0] <<= N
-    for (let i = 1; i < bs.length; i++) {
-        bs[i - 1] |= bs[i] >>> (8 - N)
-        bs[i] <<= N
-    }
-    return bs
-}
+// /**
+//  * Shift Byte Array {N} bits to the left. Does not expand byte array.
+//  *
+//  * @param {Uint8Array} bs
+//  * @param {number} N should be in the range of [0-7]
+//  */
+// export const shiftNBitsLeft = (bs: Uint8Array, N: number) => {
+//     if (N === 0) return bs
+//     bs = new Uint8Array(bs)
+//     bs[0] <<= N
+//     for (let i = 1; i < bs.length; i++) {
+//         bs[i - 1] |= bs[i] >>> (8 - N)
+//         bs[i] <<= N
+//     }
+//     return bs
+// }

@@ -1,4 +1,4 @@
-export class QueueNode {
+export class CoreQueueNode {
     next: this|null;
 
     constructor () {
@@ -6,7 +6,7 @@ export class QueueNode {
     }
 }
 
-export class QueueValue<V> extends QueueNode {
+export class CoreQueueValue<V> extends CoreQueueNode {
     v: V;
 
     constructor (v: V) {
@@ -15,7 +15,7 @@ export class QueueValue<V> extends QueueNode {
     }
 }
 
-export class CoreQueue<N extends QueueNode> {
+export class CoreQueue<N extends CoreQueueNode> {
     start: N|null;
     end: N|null;
 
@@ -24,7 +24,7 @@ export class CoreQueue<N extends QueueNode> {
         this.end = null;
     }
 
-    static create<N extends QueueNode> (): CoreQueue<N> {
+    static create<N extends CoreQueueNode> (): CoreQueue<N> {
         return new CoreQueue<N>();
     }
 
@@ -32,7 +32,7 @@ export class CoreQueue<N extends QueueNode> {
         return this.start === null;
     }
 
-    static isEmpty (queue: CoreQueue<QueueNode>) {
+    static isEmpty (queue: CoreQueue<CoreQueueNode>) {
         return queue.isEmpty()
     }
 
@@ -46,7 +46,7 @@ export class CoreQueue<N extends QueueNode> {
         }
     }
 
-    static enqueue<N extends QueueNode> (queue: CoreQueue<N>, n: N) {
+    static enqueue<N extends CoreQueueNode> (queue: CoreQueue<N>, n: N) {
         queue.enqueue(n);
     }
 
@@ -62,7 +62,7 @@ export class CoreQueue<N extends QueueNode> {
         return null;
     }
 
-    static dequeue<N extends QueueNode> (queue: CoreQueue<N>): N|null {
+    static dequeue<N extends CoreQueueNode> (queue: CoreQueue<N>): N|null {
         return queue.dequeue();
     }
 }

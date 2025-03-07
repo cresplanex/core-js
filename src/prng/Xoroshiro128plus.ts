@@ -1,10 +1,6 @@
-/**
- * @module prng
- */
-
-import { Xorshift32 } from './Xorshift32.js'
-import { CoreBinary } from '../structure/binary.js'
-import { Prng } from './prng.js'
+import { binary } from '../vo'
+import { Xorshift32 } from './Xorshift32'
+import { Prng } from './prng'
 
 /**
  * This is a variant of xoroshiro128plus - the fastest full-period generator passing BigCrush without systematic failures.
@@ -19,20 +15,19 @@ import { Prng } from './prng.js'
  *
  * [Reference implementation](http://vigna.di.unimi.it/xorshift/xoroshiro128plus.c)
  */
-export class Xoroshiro128plus implements Prng {
-    private seed: number
-    private state: Uint32Array
+export class Xoroshiro128plus extends Prng {
+    private _state: Uint32Array
     private _fresh: boolean
     /**
      * @param {number} seed Unsigned 32 bit number
      */
     constructor (seed: number) {
-        this.seed = seed
+        super()
         // This is a variant of Xoroshiro128plus to fill the initial state
         const xorshift32 = new Xorshift32(seed)
-        this.state = new Uint32Array(4)
+        this._state = new Uint32Array(4)
         for (let i = 0; i < 4; i++) {
-        this.state[i] = xorshift32.next() * CoreBinary.BITS32
+            this._state[i] = xorshift32.next() * binary.BITS32.value
         }
         this._fresh = true
     }
@@ -41,30 +36,30 @@ export class Xoroshiro128plus implements Prng {
      * @return {number} Float/Double in [0,1)
      */
     next () {
-        const state = this.state
+        const state = this._state
         if (this._fresh) {
-        this._fresh = false
-        return ((state[0] + state[2]) >>> 0) / (CoreBinary.BITS32 + 1)
+            this._fresh = false
+            return ((state[0] + state[2]) >>> 0) / (binary.BITS32.value + 1)
         } else {
-        this._fresh = true
-        const s0 = state[0]
-        const s1 = state[1]
-        const s2 = state[2] ^ s0
-        const s3 = state[3] ^ s1
-        // function js_rotl (x, k) {
-        //   k = k - 32
-        //   const x1 = x[0]
-        //   const x2 = x[1]
-        //   x[0] = x2 << k | x1 >>> (32 - k)
-        //   x[1] = x1 << k | x2 >>> (32 - k)
-        // }
-        // rotl(s0, 55) // k = 23 = 55 - 32; j = 9 =  32 - 23
-        state[0] = (s1 << 23 | s0 >>> 9) ^ s2 ^ (s2 << 14 | s3 >>> 18)
-        state[1] = (s0 << 23 | s1 >>> 9) ^ s3 ^ (s3 << 14)
-        // rol(s1, 36) // k = 4 = 36 - 32; j = 23 = 32 - 9
-        state[2] = s3 << 4 | s2 >>> 28
-        state[3] = s2 << 4 | s3 >>> 28
-        return (((state[1] + state[3]) >>> 0) / (CoreBinary.BITS32 + 1))
+            this._fresh = true
+            const s0 = state[0]
+            const s1 = state[1]
+            const s2 = state[2] ^ s0
+            const s3 = state[3] ^ s1
+            // function js_rotl (x, k) {
+            //   k = k - 32
+            //   const x1 = x[0]
+            //   const x2 = x[1]
+            //   x[0] = x2 << k | x1 >>> (32 - k)
+            //   x[1] = x1 << k | x2 >>> (32 - k)
+            // }
+            // rotl(s0, 55) // k = 23 = 55 - 32; j = 9 =  32 - 23
+            state[0] = (s1 << 23 | s0 >>> 9) ^ s2 ^ (s2 << 14 | s3 >>> 18)
+            state[1] = (s0 << 23 | s1 >>> 9) ^ s3 ^ (s3 << 14)
+            // rol(s1, 36) // k = 4 = 36 - 32; j = 23 = 32 - 9
+            state[2] = s3 << 4 | s2 >>> 28
+            state[3] = s2 << 4 | s3 >>> 28
+            return (((state[1] + state[3]) >>> 0) / (binary.BITS32.value + 1))
         }
     }
 }
