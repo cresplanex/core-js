@@ -96,20 +96,24 @@ class CoreTreeNode<K extends CoreTreeID, V extends CoreTreeVal> {
 
     // Rotate left around this node.
     rotateLeft(tree: CoreTree<K, V>): void {
+        const parent = this.parent
         const newParent = this.right;
         if (!newParent) throw new Error("rotateLeft: right child is null");
-        this.right = newParent.left;
-        newParent.left = this;
-        rotate(tree, this.parent, newParent, this);
+        const newRight = this.right!.left
+        newParent.left = this
+        this.right = newRight
+        rotate(tree, parent, newParent, this)
     }
 
     // Rotate right around this node.
     rotateRight(tree: CoreTree<K, V>): void {
+        const parent = this.parent;
         const newParent = this.left;
         if (!newParent) throw new Error("rotateRight: left child is null");
-        this.left = newParent.right;
+        const newLeft = this.left!.right;
         newParent.right = this;
-        rotate(tree, this.parent, newParent, this);
+        this.left = newLeft;
+        rotate(tree, parent, newParent, this);
     }
 
     // Returns the next node in in-order traversal.
@@ -216,7 +220,7 @@ export class CoreTree<K extends CoreTreeID, V extends CoreTreeVal> {
             }
 
             // Fix tree properties.
-            // this._fixInsert(node);
+            this._fixInsert(node);
         }
         this.length++;
 
@@ -226,9 +230,6 @@ export class CoreTree<K extends CoreTreeID, V extends CoreTreeVal> {
         return node;
     }
 
-    /**
-     * Fixes the tree after insertion to maintain red-black properties.
-     */
     _fixInsert(n: CoreTreeNode<K, V>): void {
         if (n.parent === null) {
             n.blacken();
@@ -759,7 +760,7 @@ export class CoreTree<K extends CoreTreeID, V extends CoreTreeVal> {
                             + "_".repeat(rightMid - pipePos - 1);
                         subSubLine += " ".repeat(leftMid - currentLeftSubSubEnd - 1) + "|"
                             + " ".repeat(rightMid - leftMid - 1) + "|";
-                        currentLeftSubEnd = rightMid - 1;
+                        currentLeftSubEnd = rightMid;
                         currentLeftSubSubEnd = rightMid;
                     } else if (node._left) {
                         const leftMid = node._left.middle;

@@ -73,8 +73,6 @@ describe("CoreTree", () => {
         tree.put(c);
         tree.put(d);
 
-        console.log(tree.display());
-
         const result = tree.inOrderTraversal().map(v => v.label);
         // Sorted order by ID: A (10,1), C (15,1), B (20,1), D (20,2)
         expect(result).toEqual(["A", "C", "B", "D"]);
@@ -108,79 +106,79 @@ describe("CoreTree", () => {
         expect(node?.val?.label).toBe("B");
     });
 
-    // test("findNodeWithUpperBound returns the correct node", () => {
-    //     const a = createVal(10, 1, "A");
-    //     const b = createVal(15, 1, "B");
-    //     const c = createVal(20, 1, "C");
-    //     tree.put(a);
-    //     tree.put(b);
-    //     tree.put(c);
+    test("findNodeWithUpperBound returns the correct node", () => {
+        const a = createVal(10, 1, "A");
+        const b = createVal(15, 1, "B");
+        const c = createVal(20, 1, "C");
+        tree.put(a);
+        tree.put(b);
+        tree.put(c);
 
-    //     // Query an ID between B and C should return B.
-    //     const queryID = createID(18, 0);
-    //     const node = tree.findNodeWithUpperBound(queryID);
-    //     expect(node).not.toBeNull();
-    //     expect(node?.val?.label).toBe("B");
-    // });
+        // Query an ID between B and C should return B.
+        const queryID = createID(18, 0);
+        const node = tree.findNodeWithUpperBound(queryID);
+        expect(node).not.toBeNull();
+        expect(node?.val?.label).toBe("B");
+    });
 
-    // test("findNext and findPrev return adjacent values", () => {
-    //     // Insert nodes
-    //     const a = createVal(10, 1, "A");
-    //     const b = createVal(15, 1, "B");
-    //     const c = createVal(20, 1, "C");
-    //     tree.put(a);
-    //     tree.put(b);
-    //     tree.put(c);
+    test("findNext and findPrev return adjacent values", () => {
+        // Insert nodes
+        const a = createVal(10, 1, "A");
+        const b = createVal(15, 1, "B");
+        const c = createVal(20, 1, "C");
+        tree.put(a);
+        tree.put(b);
+        tree.put(c);
 
-    //     // findNext: next of A should be B, next of B should be C.
-    //     expect(tree.findNext(a._id)).not.toBeNull();
-    //     expect(tree.findNext(a._id)?.label).toBe("B");
-    //     expect(tree.findNext(b._id)?.label).toBe("C");
+        // findNext: next of A should be B, next of B should be C.
+        expect(tree.findNext(a._id)).not.toBeNull();
+        expect(tree.findNext(a._id)?.label).toBe("B");
+        expect(tree.findNext(b._id)?.label).toBe("C");
 
-    //     // findPrev: previous of C should be B, previous of B should be A.
-    //     expect(tree.findPrev(c._id)).not.toBeNull();
-    //     expect(tree.findPrev(c._id)?.label).toBe("B");
-    //     expect(tree.findPrev(b._id)?.label).toBe("A");
-    // });
+        // findPrev: previous of C should be B, previous of B should be A.
+        expect(tree.findPrev(c._id)).not.toBeNull();
+        expect(tree.findPrev(c._id)?.label).toBe("B");
+        expect(tree.findPrev(b._id)?.label).toBe("A");
+    });
 
-    // test("iterate calls callback for values within range", () => {
-    //     // Insert nodes: A (10,1), B (15,1), C (20,1), D (25,1)
-    //     const a = createVal(10, 1, "A");
-    //     const b = createVal(15, 1, "B");
-    //     const c = createVal(20, 1, "C");
-    //     const d = createVal(25, 1, "D");
-    //     tree.put(a);
-    //     tree.put(b);
-    //     tree.put(c);
-    //     tree.put(d);
+    test("iterate calls callback for values within range", () => {
+        // Insert nodes: A (10,1), B (15,1), C (20,1), D (25,1)
+        const a = createVal(10, 1, "A");
+        const b = createVal(15, 1, "B");
+        const c = createVal(20, 1, "C");
+        const d = createVal(25, 1, "D");
+        tree.put(a);
+        tree.put(b);
+        tree.put(c);
+        tree.put(d);
 
-    //     // Iterate from ID(12,0) to D (25,1) should yield B, C, D
-    //     const fromID = createID(12, 0);
-    //     // For the upper bound, we can simply pass d as the value.
-    //     const collected: string[] = [];
-    //     tree.iterate(fromID, d, (v) => {
-    //     collected.push(v.label);
-    //     });
-    //     expect(collected).toEqual(["B", "C", "D"]);
-    // });
+        // Iterate from ID(12,0) to D (25,1) should yield B, C, D
+        const fromID = createID(12, 0);
+        // For the upper bound, we can simply pass d as the value.
+        const collected: string[] = [];
+        tree.iterate(fromID, d, (v) => {
+        collected.push(v.label);
+        });
+        expect(collected).toEqual(["B", "C", "D"]);
+    });
 
-    // test("delete removes a node and maintains in-order traversal", () => {
-    //     // Insert nodes in unsorted order.
-    //     const a = createVal(10, 1, "A");
-    //     const b = createVal(15, 1, "B");
-    //     const c = createVal(20, 1, "C");
-    //     tree.put(a);
-    //     tree.put(b);
-    //     tree.put(c);
+    test("delete removes a node and maintains in-order traversal", () => {
+        // Insert nodes in unsorted order.
+        const a = createVal(10, 1, "A");
+        const b = createVal(15, 1, "B");
+        const c = createVal(20, 1, "C");
+        tree.put(a);
+        tree.put(b);
+        tree.put(c);
 
-    //     // Delete B
-    //     tree.delete(b._id);
-    //     expect(tree.find(b._id)).toBeNull();
+        // Delete B
+        tree.delete(b._id);
+        expect(tree.find(b._id)).toBeNull();
 
-    //     // In-order traversal should yield A and C only.
-    //     const result = tree.inOrderTraversal().map(v => v.label);
-    //     expect(result).toEqual(["A", "C"]);
-    //     // Length should be reduced by one.
-    //     expect(tree.length).toBe(2);
-    // });
+        // In-order traversal should yield A and C only.
+        const result = tree.inOrderTraversal().map(v => v.label);
+        expect(result).toEqual(["A", "C"]);
+        // Length should be reduced by one.
+        expect(tree.length).toBe(2);
+    });
 });
