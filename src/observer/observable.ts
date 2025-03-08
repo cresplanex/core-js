@@ -1,30 +1,15 @@
-/**
- * Observable class prototype.
- *
- * @module observable
- */
-
-import { CoreMap } from '../structure/map.js'
-import { CoreSet } from '../structure/set.js'
-import { CoreArray } from '../structure/array.js'
+import { CoreMap, CoreArray, CoreSet } from '../structure'
 
 /**
  * Handles named events.
- * @experimental
  *
- * This is basically a (better typed) duplicate of Observable, which will replace Observable in the
- * next release.
  *
  * @template {{[key in keyof EVENTS]: function(...any):void}} EVENTS
  */
 export class Observable<EVENTS extends {[key in keyof EVENTS]: (...args: any) => void}> {
-    _observers: CoreMap<string, CoreSet<any>>
+    _observers: CoreMap<string, CoreSet<EVENTS[keyof EVENTS]>>
 
     constructor () {
-        /**
-         * Some desc.
-         * @type {Map<string, Set<any>>}
-         */
         this._observers = CoreMap.create()
     }
 
@@ -44,9 +29,6 @@ export class Observable<EVENTS extends {[key in keyof EVENTS]: (...args: any) =>
      * @param {EVENTS[NAME]} f
      */
     once <NAME extends keyof EVENTS & string> (name: NAME, f: EVENTS[NAME]): void {
-        /**
-         * @param  {...any} args
-         */
         const _f = ((...args: any) => {
             this.off(name, _f)
             f(...args)
@@ -81,7 +63,10 @@ export class Observable<EVENTS extends {[key in keyof EVENTS]: (...args: any) =>
      */
     emit <NAME extends keyof EVENTS & string> (name: NAME, ...args: Parameters<EVENTS[NAME]>): void {
         // copy all listeners to an array first to make sure that no event is emitted to listeners that are subscribed while the event handler is called.
-        return CoreArray.from((this._observers.get(name) || CoreMap.create<string, CoreSet<any>>()).values()).forEach(f => f(...args))
+        return CoreArray.from(
+            ((this._observers.get(name) as CoreSet<EVENTS[keyof EVENTS]>) 
+            || CoreMap.create<string, CoreSet<EVENTS[keyof EVENTS]>>()).values()
+        ).forEach(f => f(...args))
     }
 
     destroy () {

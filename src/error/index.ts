@@ -1,2 +1,2 @@
 export { ErrorFactory } from './error'
-export { methodUnimplemented, unexpectedCase } from './const'
+export { methodUnimplemented, unexpectedCase, methodUnimplementedErr, unexpectedCaseErr } from './const'

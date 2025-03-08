@@ -1,34 +1,103 @@
-// /**
-//  * Utility module to convert metric values.
-//  *
-//  * @module metric
-//  */
-
 import * as math from './math'
 
-export const yotta = 1e24
-export const zetta = 1e21
-export const exa = 1e18
-export const peta = 1e15
-export const tera = 1e12
-export const giga = 1e9
-export const mega = 1e6
-export const kilo = 1e3
-export const hecto = 1e2
-export const deca = 10
-export const deci = 0.1
-export const centi = 0.01
-export const milli = 1e-3
-export const micro = 1e-6
-export const nano = 1e-9
-export const pico = 1e-12
-export const femto = 1e-15
-export const atto = 1e-18
-export const zepto = 1e-21
-export const yocto = 1e-24
+export const MetricUnits = {
+    YOTTA: 1e24,
+    ZETTA: 1e21,
+    EXA: 1e18,
+    PETA: 1e15,
+    TERA: 1e12,
+    GIGA: 1e9,
+    MEGA: 1e6,
+    KILO: 1e3,
+    HECTO: 1e2,
+    DECA: 10,
+    UNIT: 1,
+    DECI: 0.1,
+    CENTI: 0.01,
+    MILLI: 1e-3,
+    MICRO: 1e-6,
+    NANO: 1e-9,
+    PICO: 1e-12,
+    FEMTO: 1e-15,
+    ATTO: 1e-18,
+    ZEPTO: 1e-21,
+    YOCTO: 1e-24
+} as const;
+export type MetricUnit = typeof MetricUnits[keyof typeof MetricUnits]
 
-const prefixUp = ['', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
-const prefixDown = ['', 'm', 'μ', 'n', 'p', 'f', 'a', 'z', 'y']
+export function withMetricUnit(n: number, unit: MetricUnit): number {
+    return n * unit
+}
+
+export const MetricPrefixes = {
+    YOTTA: 'Y',
+    ZETTA: 'Z',
+    EXA: 'E',
+    PETA: 'P',
+    TERA: 'T',
+    GIGA: 'G',
+    MEGA: 'M',
+    KILO: 'k',
+    HECTO: 'h',
+    DECA: 'da',
+    UNIT: '',
+    DECI: 'd',
+    CENTI: 'c',
+    MILLI: 'm',
+    MICRO: 'μ',
+    NANO: 'n',
+    PICO: 'p',
+    FEMTO: 'f',
+    ATTO: 'a',
+    ZEPTO: 'z',
+    YOCTO: 'y'
+} as const;
+
+export const prefixUp = [
+    MetricPrefixes.UNIT,
+    MetricPrefixes.KILO,
+    MetricPrefixes.MEGA,
+    MetricPrefixes.GIGA,
+    MetricPrefixes.TERA,
+    MetricPrefixes.PETA,
+    MetricPrefixes.EXA,
+    MetricPrefixes.ZETTA,
+    MetricPrefixes.YOTTA
+]
+
+export const prefixDown = [
+    MetricPrefixes.UNIT,
+    MetricPrefixes.MILLI,
+    MetricPrefixes.MICRO,
+    MetricPrefixes.NANO,
+    MetricPrefixes.PICO,
+    MetricPrefixes.FEMTO,
+    MetricPrefixes.ATTO,
+    MetricPrefixes.ZEPTO,
+    MetricPrefixes.YOCTO
+]
+
+
+export const MetricMultipliers = {
+    YOTTA: 8,
+    ZETTA: 7,
+    EXA: 6,
+    PETA: 5,
+    TERA: 4,
+    GIGA: 3,
+    MEGA: 2,
+    KILO: 1,
+    UNIT: 0,
+    MILLI: -1,
+    MICRO: -2,
+    NANO: -3,
+    PICO: -4,
+    FEMTO: -5,
+    ATTO: -6,
+    ZEPTO: -7,
+    YOCTO: -8
+} as const;
+export type MetricMultiplier = typeof MetricMultipliers[keyof typeof MetricMultipliers]
 
 /**
  * Calculate the metric prefix for a number. Assumes E.g. `prefix(1000) = { n: 1, prefix: 'k' }`
@@ -37,7 +106,7 @@ const prefixDown = ['', 'm', 'μ', 'n', 'p', 'f', 'a', 'z', 'y']
  * @param {number} [baseMultiplier] Multiplier of the base (10^(3*baseMultiplier)). E.g. `convert(time, -3)` if time is already in milli seconds
  * @return {{n:number,prefix:string}}
  */
-export const prefix = (n: number, baseMultiplier = 0): { n: number, prefix: string } => {
+export const prefix = (n: number, baseMultiplier: MetricMultiplier = MetricMultipliers.UNIT): { n: number, prefix: string } => {
     const nPow = n === 0 ? 0 : math.log10(n)
     let mult = 0
     while (nPow < mult * 3 && baseMultiplier > -8) {
