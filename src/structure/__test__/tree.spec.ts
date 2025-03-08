@@ -101,6 +101,8 @@ describe("CoreTree", () => {
 
         // A new ID between A and B should return B.
         const queryID = createID(12, 0);
+
+        // Find the biggest node with ID <= queryID
         const node = tree.findNodeWithLowerBound(queryID);
         expect(node).not.toBeNull();
         expect(node?.val?.label).toBe("B");
@@ -116,6 +118,7 @@ describe("CoreTree", () => {
 
         // Query an ID between B and C should return B.
         const queryID = createID(18, 0);
+        // Find the smallest node with ID >= queryID
         const node = tree.findNodeWithUpperBound(queryID);
         expect(node).not.toBeNull();
         expect(node?.val?.label).toBe("B");
@@ -134,11 +137,13 @@ describe("CoreTree", () => {
         expect(tree.findNext(a._id)).not.toBeNull();
         expect(tree.findNext(a._id)?.label).toBe("B");
         expect(tree.findNext(b._id)?.label).toBe("C");
+        expect(tree.findNext(c._id)).toBeNull();
 
         // findPrev: previous of C should be B, previous of B should be A.
         expect(tree.findPrev(c._id)).not.toBeNull();
         expect(tree.findPrev(c._id)?.label).toBe("B");
         expect(tree.findPrev(b._id)?.label).toBe("A");
+        expect(tree.findPrev(a._id)).toBeNull();
     });
 
     test("iterate calls callback for values within range", () => {
@@ -157,7 +162,7 @@ describe("CoreTree", () => {
         // For the upper bound, we can simply pass d as the value.
         const collected: string[] = [];
         tree.iterate(fromID, d, (v) => {
-        collected.push(v.label);
+            collected.push(v.label);
         });
         expect(collected).toEqual(["B", "C", "D"]);
     });

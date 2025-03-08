@@ -18,6 +18,10 @@ export class CoreTreeID {
         return this.clock < id.clock || (this.clock === id.clock && this.client < id.client);
     }
 
+    lessThanOrEqual(id: CoreTreeID): boolean {
+        return this.clock <= id.clock || (this.clock === id.clock && this.client <= id.client);
+    }
+
     clone(): CoreTreeID {
         return new CoreTreeID(this.clock, this.client);
     }
@@ -439,7 +443,7 @@ export class CoreTree<K extends CoreTreeID, V extends CoreTreeVal> {
         let o = this.root;
         let candidate: CoreTreeNode<K, V> | null = null;
         while (o !== null) {
-            if (from.lessThan(o.val!._id) || from.equals(o.val!._id)) {
+            if (from.lessThanOrEqual(o.val!._id)) {
                 candidate = o;
                 o = o.left;
             } else {
@@ -488,7 +492,7 @@ export class CoreTree<K extends CoreTreeID, V extends CoreTreeVal> {
     findSmallestNode(): CoreTreeNode<K, V> | null {
         let o = this.root;
         while (o && o.left !== null) {
-        o = o.left;
+            o = o.left;
         }
         return o;
     }
@@ -502,16 +506,16 @@ export class CoreTree<K extends CoreTreeID, V extends CoreTreeVal> {
     iterate(from: K | null, to: V | null, f: (v: V) => void): void {
         let o: CoreTreeNode<K, V> | null = from === null ? this.findSmallestNode() : this.findNodeWithLowerBound(from);
         while (
-        o !== null &&
-        (to === null ||
-            (o.val !== null &&
-            (o.val._id.lessThan(to._id) || o.val._id.equals(to._id)))
-        )
+            o !== null &&
+            (to === null ||
+                (o.val !== null &&
+                o.val._id.lessThanOrEqual(to._id))
+            )
         ) {
-        if (o.val !== null) {
-            f(o.val);
-        }
-        o = o.next();
+            if (o.val !== null) {
+                f(o.val);
+            }
+            o = o.next();
         }
     }
 
