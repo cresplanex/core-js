@@ -1,37 +1,21 @@
 /**
  * Efficient schema-less binary decoding with support for variable length encoding.
  *
- * Use [lib0/decoding] with [lib0/encoding]. Every encoding function has a corresponding decoding function.
+ * Every encoding function has a corresponding decoding function.
  *
  * Encodes numbers in little-endian order (least to most significant byte order)
  * and is compatible with Golang's binary encoding (https://golang.org/pkg/encoding/binary/)
  * which is also used in Protocol Buffers.
  *
- * ```js
- * // encoding step
- * const encoder = encoding.createEncoder()
- * encoding.writeVarUint(encoder, 256)
- * encoding.writeVarString(encoder, 'Hello world!')
- * const buf = encoding.toUint8Array(encoder)
- * ```
- *
- * ```js
- * // decoding step
- * const decoder = decoding.createDecoder(buf)
- * decoding.readVarUint(decoder) // => 256
- * decoding.readVarString(decoder) // => 'Hello world!'
- * decoding.hasContent(decoder) // => false - all data is read
- * ```
- *
  * @module decoding
  */
 
 import { CoreBinary } from '../structure/binary'
-import * as math from './math'
-import * as number from './number'
-import * as string from './string'
+import * as math from '../utils/math'
+import * as number from '../utils/number'
+import * as string from '../utils/string'
 import * as error from './error'
-import * as encoding from './encoding'
+import * as encoding from '../encode/encoding'
 
 const errorUnexpectedEndOfArray = error.create('Unexpected end of array')
 const errorIntegerOutOfRange = error.create('Integer out of Range')
@@ -488,7 +472,7 @@ export class CoreDecoder {
      * @return {Uint8Array}
      */
     static readTerminatedUint8Array(decoder: CoreDecoder): Uint8Array {
-        const encoder = encoding.CoreEncoder.create()
+        const encoder = encoding.Encoder.create()
         let b
         while (true) {
             b = CoreDecoder.readUint8(decoder)

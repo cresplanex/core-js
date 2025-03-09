@@ -8,8 +8,8 @@ import * as string from './string'
 import * as env from './environment'
 import { CoreArray } from '../structure/array'
 import * as math from './math'
-import * as encoding from './encoding'
-import * as decoding from './decoding'
+import * as encoding from '../encode/encoding'
+import * as decoding from '../decode/decoding'
 import { numberUtil } from '.'
 
 /**

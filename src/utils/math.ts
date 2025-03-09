@@ -53,3 +53,5 @@ export const degToRad = (degrees: number) => degrees * Math.PI / 180
 export const fixFloatingPoint = (num: number, multiplier: number) => {
     return round((num * multiplier) + Number.EPSILON)
 }
+export const isNegativeZero = (n: number) => 
+    n !== 0 ? n < 0 : 1 / n < 0

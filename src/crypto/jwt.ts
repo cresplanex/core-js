@@ -9,7 +9,7 @@ import * as time from '../utils/time'
  * @param {Object} data
  */
 const _stringify = (data: Object): string => {
-    const encodedData = string.encodeUtf8(json.stringify(data))
+    const encodedData = string.utf8TextEncoder(json.stringify(data))
     if (!encodedData) {
         throw new Error('Failed to encode data')
     }
@@ -41,7 +41,7 @@ export const encodeJwt = (privateKey: CryptoKey, payload: Object): PromiseLike<s
         typ: 'JWT'
     }
     const jwt = _stringify(header) + '.' + _stringify(payload)
-    const encoded = string.encodeUtf8(jwt)
+    const encoded = string.utf8TextEncoder(jwt)
     if (!encoded) {
         throw new Error('Failed to encode data')
     }
@@ -56,7 +56,7 @@ export const encodeJwt = (privateKey: CryptoKey, payload: Object): PromiseLike<s
  */
 export const verifyJwt = async (publicKey: CryptoKey, jwt: string): Promise<{ header: Object, payload: Object }> => {
     const [headerBase64, payloadBase64, signatureBase64] = jwt.split('.')
-    const encoded = string.encodeUtf8(headerBase64 + '.' + payloadBase64)
+    const encoded = string.utf8TextEncoder(headerBase64 + '.' + payloadBase64)
     if (!encoded) {
         throw new Error('Failed to encode data')
     }

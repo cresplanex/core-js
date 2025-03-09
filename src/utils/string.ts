@@ -50,54 +50,150 @@ export const unescape = (str: string): string =>
 
 export const utf8ByteLength = (str: string): number => unescape(encodeURIComponent(str)).length
 
-export const _encodeUtf8Polyfill = (str: string): Uint8Array => {
-    // Convert the string to its UTF-8 encoded form without using unescape.
-    const encodedString = unescape(encodeURIComponent(str));
-    const len = encodedString.length;
-    const buf = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        buf[i] = encodedString.charCodeAt(i);
-    }
-    return buf;
-};
-
-export const utf8TextEncoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null
-
-export const _encodeUtf8Native = (str: string) => utf8TextEncoder!.encode(str)
-
-export const encodeUtf8 = utf8TextEncoder ? _encodeUtf8Native : _encodeUtf8Polyfill
-
-export const _decodeUtf8Polyfill = (buf: Uint8Array) => {
-    let remainingLen = buf.length
-    let encodedString = ''
-    let bufPos = 0
-    const chunkSize = 65535
-    while (remainingLen > 0) {
-        const nextLen = remainingLen < chunkSize ? remainingLen : chunkSize
-        const bytes = buf.subarray(bufPos, bufPos + nextLen)
-        bufPos += nextLen
-        // Starting with ES5.1 we can supply a generic array-like object as arguments
-        encodedString += String.fromCodePoint.apply(null, Array.from(bytes))
-        remainingLen -= nextLen
-    }
-    return decodeURIComponent(escape(encodedString))
+export interface Utf8Encoder {
+    encode: (str: string) => Uint8Array
+    encodeInto: (source: string, destination: Uint8Array) => { read: number, written: number }
+    isSupported: () => boolean
 }
 
-export let utf8TextDecoder = typeof TextDecoder === 'undefined' ? 
-    null : new TextDecoder('utf-8', { fatal: true, ignoreBOM: true })
+export class Utf8EncoderPolyfill implements Utf8Encoder {
+    static instance = new Utf8EncoderPolyfill()
+    
+    encode(str: string) {
+        // Convert the string to its UTF-8 encoded form without using unescape.
+        const encodedString = unescape(encodeURIComponent(str))
+        const len = encodedString.length
+        const buf = new Uint8Array(len)
+        for (let i = 0; i < len; i++) {
+            buf[i] = encodedString.charCodeAt(i)
+        }
+        return buf
+    }
 
-if (utf8TextDecoder && utf8TextDecoder.decode(new Uint8Array()).length === 1) {
-  // Safari doesn't handle BOM correctly.
-  // This fixes a bug in Safari 13.0.5 where it produces a BOM the first time it is called.
-  // utf8TextDecoder.decode(new Uint8Array()).length === 1 on the first call and
-  // utf8TextDecoder.decode(new Uint8Array()).length === 1 on the second call
-  // Another issue is that from then on no BOM chars are recognized anymore
-    utf8TextDecoder = null
+    encodeInto(source: string, destination: Uint8Array) {
+        let destIndex = 0;
+        let sourceIndex = 0;
+        // Process the source string to convert each character into its UTF-8 encoded form.
+        while (sourceIndex < source.length) {
+            // Handle surrogate pairs by processing one code point at a time.
+            const codePoint = source.codePointAt(sourceIndex)!;
+            const charStr = String.fromCodePoint(codePoint);
+            // Convert the character to its UTF-8 representation.
+            const encodedChunk = unescape(encodeURIComponent(charStr));
+            // If there's not enough space in the destination buffer, exit the loop.
+            if (destIndex + encodedChunk.length > destination.length) {
+                break;
+            }
+            // Write each byte of the encoded chunk into the destination buffer.
+            for (let i = 0; i < encodedChunk.length; i++) {
+                destination[destIndex++] = encodedChunk.charCodeAt(i);
+            }
+            // Move the source index forward by the length of the processed character.
+            sourceIndex += charStr.length;
+        }
+        // Return the number of characters read and bytes written.
+        return { read: sourceIndex, written: destIndex };
+    }
+
+    isSupported() {
+        return true
+    }
 }
 
-export const _decodeUtf8Native = (buf: Uint8Array) => utf8TextDecoder!.decode(buf)
+export class Utf8EncoderNative implements Utf8Encoder {
+    static instance = new Utf8EncoderNative()
 
-export const decodeUtf8 = utf8TextDecoder ? _decodeUtf8Native : _decodeUtf8Polyfill
+    private textEncoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null
+
+    encode(str: string) {
+        if (!this.textEncoder) {
+            throw new Error('TextEncoder is not supported')
+        }
+        return this.textEncoder.encode(str)
+    }
+
+    encodeInto(source: string, destination: Uint8Array) {
+        if (!this.textEncoder) {
+            throw new Error('TextEncoder is not supported')
+        }
+        return this.textEncoder.encodeInto(source, destination)
+    }
+
+    isSupported() {
+        return !!this.textEncoder
+    }
+}
+
+export const polyfillEncoder = Utf8EncoderPolyfill.instance
+export const nativeEncoder = Utf8EncoderNative.instance
+
+export const utf8TextEncoder = nativeEncoder.isSupported() ? 
+    nativeEncoder : polyfillEncoder
+
+export interface Utf8Decoder {
+    decode: (buf: Uint8Array) => string
+    isSupported: () => boolean
+}
+
+export class Utf8DecoderPolyfill implements Utf8Decoder {
+    static instance = new Utf8DecoderPolyfill()
+
+    decode(buf: Uint8Array) {
+        let remainingLen = buf.length
+        let encodedString = ''
+        let bufPos = 0
+        const chunkSize = 65535
+        while (remainingLen > 0) {
+            const nextLen = remainingLen < chunkSize ? remainingLen : chunkSize
+            const bytes = buf.subarray(bufPos, bufPos + nextLen)
+            bufPos += nextLen
+            // Starting with ES5.1 we can supply a generic array-like object as arguments
+            encodedString += String.fromCodePoint.apply(null, Array.from(bytes))
+            remainingLen -= nextLen
+        }
+        return decodeURIComponent(escape(encodedString))
+    }
+
+    isSupported(): boolean {
+        return true
+    }
+}
+
+export class Utf8DecoderNative implements Utf8Decoder {
+    static instance = new Utf8DecoderNative()   
+
+    private textDecoder;
+
+    constructor() {
+        this.textDecoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }) : null
+
+        if (this.textDecoder && this.textDecoder.decode(new Uint8Array()).length === 1) {
+            // Safari doesn't handle BOM correctly. 
+            // This fixes a bug in Safari 13.0.5 where it produces a BOM the first time it is called.
+            // this.textDecoder.decode(new Uint8Array()).length === 1 on the first call and
+            // this.textDecoder.decode(new Uint8Array()).length === 1 on the second call
+            // Another issue is that from then on no BOM chars are recognized anymore
+            this.textDecoder = null
+        }
+    }
+
+    decode(buf: Uint8Array) {
+        if (!this.textDecoder) {
+            throw new Error('TextDecoder is not supported')
+        }
+        return this.textDecoder.decode(buf)
+    }
+
+    isSupported(): boolean {
+        return !!this.textDecoder
+    }
+}
+
+export const polyfillDecoder = Utf8DecoderPolyfill.instance
+export const nativeDecoder = Utf8DecoderNative.instance
+
+export const utf8TextDecoder = nativeDecoder.isSupported() ? 
+    nativeDecoder : polyfillDecoder
 
 export const splice = (str: string, index: number, remove: number, insert = '') => 
     str.slice(0, index) + insert + str.slice(index + remove)

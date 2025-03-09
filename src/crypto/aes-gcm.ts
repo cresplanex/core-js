@@ -2,8 +2,8 @@
  * AES-GCM is a symmetric key for encryption
  */
 
-import * as encoding from '../utils/encoding'
-import * as decoding from '../utils/decoding'
+import * as encoding from '../encode/encoding'
+import * as decoding from '../decode/decoding'
 import * as webcrypto from '../csprng'
 import { stringUtil } from '../utils'
 export { exportKeyJwk, exportKeyRaw } from './common'
@@ -32,7 +32,7 @@ export const encrypt = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Arra
         key,
         data
     ).then(cipher => {
-        const encryptedDataEncoder = encoding.CoreEncoder.create()
+        const encryptedDataEncoder = encoding.Encoder.create()
         // iv may be sent in the clear to the other peers
         encryptedDataEncoder.writeUint8Array(iv)
         encryptedDataEncoder.writeVarUint8Array(new Uint8Array(cipher))
@@ -102,7 +102,7 @@ export const importKeyRaw = (raw: Uint8Array, { usages = defaultUsages, extracta
  * @param {Uint8Array | string} data
  */
 const toBinary = (data: Uint8Array | string) => {
-    const encoded = typeof data === 'string' ? stringUtil.encodeUtf8(data) : data
+    const encoded = typeof data === 'string' ? stringUtil.utf8TextEncoder(data) : data
     if (!encoded) {
         throw new Error('Failed to encode data')
     }

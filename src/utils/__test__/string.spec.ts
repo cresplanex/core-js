@@ -6,14 +6,14 @@ import {
     trimLeft,
     fromCamelCase,
     utf8ByteLength,
-    _encodeUtf8Polyfill,
+    Utf8EncoderPolyfill,
+    Utf8EncoderNative,
     utf8TextEncoder,
-    _encodeUtf8Native,
-    encodeUtf8,
-    _decodeUtf8Polyfill,
+    polyfillEncoder,
+    nativeEncoder,
     utf8TextDecoder,
-    _decodeUtf8Native,
-    decodeUtf8,
+    polyfillDecoder,
+    nativeDecoder,
     splice,
     repeat
   } from "../string"; // Adjust the import path as needed
@@ -59,23 +59,23 @@ describe("String Utilities", () => {
 
         test("encodeUtf8 and decodeUtf8 are inverse operations", () => {
             const testString = "Hello, 世界! 😀";
-            const encoded = encodeUtf8(testString);
+            const encoded = utf8TextEncoder.encode(testString);
             expect(encoded).toBeInstanceOf(Uint8Array);
-            const decoded = decodeUtf8(encoded);
+            const decoded = utf8TextDecoder.decode(encoded);
             expect(decoded).toBe(testString);
         });
 
         test("_encodeUtf8Polyfill correctly encodes a string", () => {
             const testString = "hello";
-            const encoded = _encodeUtf8Polyfill(testString);
+            const encoded = polyfillEncoder.encode(testString);
             const expected = new Uint8Array([104, 101, 108, 108, 111]); // 'h', 'e', 'l', 'l', 'o'
             expect(Array.from(encoded)).toEqual(Array.from(expected));
         });
 
-        if (utf8TextEncoder) {
+        if (nativeEncoder.isSupported()) {
             test("_encodeUtf8Native correctly encodes a string", () => {
                 const testString = "hello";
-                const encoded = _encodeUtf8Native(testString);
+                const encoded = nativeEncoder.encode(testString);
                 expect(encoded).toBeInstanceOf(Uint8Array);
                 const expected = new Uint8Array([104, 101, 108, 108, 111]);
                 expect(Array.from(encoded!)).toEqual(Array.from(expected));
@@ -85,15 +85,15 @@ describe("String Utilities", () => {
         test("_decodeUtf8Polyfill decodes a Uint8Array back to a string", () => {
             const testString = "hello";
             const encoded = new Uint8Array([104, 101, 108, 108, 111]);
-            const decoded = _decodeUtf8Polyfill(encoded);
+            const decoded = polyfillDecoder.decode(encoded);
             expect(decoded).toBe(testString);
         });
 
-        if (utf8TextDecoder) {
+        if (nativeDecoder.isSupported()) {
             test("_decodeUtf8Native decodes a Uint8Array back to a string", () => {
                 const testString = "hello";
-                const encoded = utf8TextEncoder!.encode(testString);
-                const decoded = _decodeUtf8Native(encoded);
+                const encoded = utf8TextEncoder.encode(testString);
+                const decoded = nativeDecoder.decode(encoded);
                 expect(decoded).toBe(testString);
             });
         }
