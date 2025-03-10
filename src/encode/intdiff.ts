@@ -1,3 +1,4 @@
+import { Decoder, readVarInt, StatefulDecoder } from "./decoding"
 import { Encoder, StatefulEncoder, writeVarInt } from "./encoding"
 
 /**
@@ -7,12 +8,15 @@ import { Encoder, StatefulEncoder, writeVarInt } from "./encoding"
  */
 export class IntDiffEncoder extends Encoder implements StatefulEncoder<number> {
     s: number
+    initialS: number
+
     /**
      * @param {number} start
      */
     constructor (start: number) {
         super()
         this.s = start
+        this.initialS = start
     }
 
     /**
@@ -21,5 +25,38 @@ export class IntDiffEncoder extends Encoder implements StatefulEncoder<number> {
     write (v: number) {
         writeVarInt(this, v - this.s)
         this.s = v
+    }
+
+    reset() {
+        Encoder.prototype.reset.call(this)
+        this.s = this.initialS
+    }
+}
+
+export class IntDiffDecoder extends Decoder implements StatefulDecoder<number> {
+    s: number
+    initialS: number
+
+    /**
+     * @param {Uint8Array} uint8Array
+     * @param {number} start
+     */
+    constructor (uint8Array: Uint8Array, start: number) {
+        super(uint8Array)
+        this.s = start
+        this.initialS = start
+    }
+
+    /**
+     * @return {number}
+     */
+    read () {
+        this.s += readVarInt(this)
+        return this.s
+    }
+
+    reset() {
+        Decoder.prototype.reset.call(this)
+        this.s = this.initialS
     }
 }

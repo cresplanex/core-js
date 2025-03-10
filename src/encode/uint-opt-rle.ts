@@ -1,3 +1,5 @@
+import * as mathUtil from "../utils/math"
+import { Decoder, readVarInt, readVarUint, StatefulDecoder } from "./decoding"
 import { Encoder, StatefulEncoder, writeVarInt, writeVarUint } from "./encoding"
 
 /**
@@ -41,6 +43,12 @@ export class UintOptRleEncoder implements StatefulEncoder<number> {
         flushUintOptRleEncoder(this)
         return this.encoder.toUint8Array()
     }
+
+    reset() {
+        this.encoder.reset()
+        this.s = 0
+        this.count = 0
+    }
 }
 
 /**
@@ -55,5 +63,40 @@ export const flushUintOptRleEncoder = (encoder: UintOptRleEncoder) => {
         if (encoder.count > 1) {
             writeVarUint(encoder.encoder, encoder.count - 2) // since count is always > 1, we can decrement by one. non-standard encoding ftw
         }
+    }
+}
+
+export class UintOptRleDecoder extends Decoder implements StatefulDecoder<number> {
+    s: number
+    count: number
+
+    /**
+     * @param {Uint8Array} uint8Array
+     */
+    constructor (uint8Array: Uint8Array) {
+        super(uint8Array)
+        this.s = 0
+        this.count = 0
+    }
+
+    read (): number {
+        if (this.count === 0) {
+            this.s = readVarInt(this)
+            // if the sign is negative, we read the count too, otherwise count is 1
+            const isNegative = mathUtil.isNegativeZero(this.s)
+            this.count = 1
+            if (isNegative) {
+                this.s = -this.s
+                this.count = readVarUint(this) + 2
+            }
+        }
+        this.count--
+        return this.s
+    }
+
+    reset() {
+        Decoder.prototype.reset.call(this)
+        this.s = 0
+        this.count = 0
     }
 }

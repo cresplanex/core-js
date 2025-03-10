@@ -1,18 +1,18 @@
-import { CoreSymbol } from '../structure/symbol'
 import * as time from '../utils/time'
-import * as env from '../utils/environment'
+import * as env from '../env/environment'
 import * as func from '../utils/function'
 import * as json from '../utils/json'
+import * as symbol from '../utils/symbol'
 
-export const BOLD = CoreSymbol.create()
-export const UNBOLD = CoreSymbol.create()
-export const BLUE = CoreSymbol.create()
-export const GREY = CoreSymbol.create()
-export const GREEN = CoreSymbol.create()
-export const RED = CoreSymbol.create()
-export const PURPLE = CoreSymbol.create()
-export const ORANGE = CoreSymbol.create()
-export const UNCOLOR = CoreSymbol.create()
+export const BOLD = symbol.create()
+export const UNBOLD = symbol.create()
+export const BLUE = symbol.create()
+export const GREY = symbol.create()
+export const GREEN = symbol.create()
+export const RED = symbol.create()
+export const PURPLE = symbol.create()
+export const ORANGE = symbol.create()
+export const UNCOLOR = symbol.create()
 
 /**
  * @param {Array<undefined|string|Symbol|Object|number|function():any>} args
@@ -54,7 +54,6 @@ const loggingColors = [GREEN, PURPLE, ORANGE, BLUE]
 let nextColor = 0
 let lastLoggingTime = time.getUnixTime()
 
-/* c8 ignore start */
 /**
  * @param {function(...any):void} _print
  * @param {string} moduleName

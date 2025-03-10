@@ -1,5 +1,6 @@
+import { readVarString, StatefulDecoder } from "./decoding"
 import { Encoder, StatefulEncoder, writeUint8Array, writeVarString } from "./encoding"
-import { UintOptRleEncoder } from "./uint-opt-rle"
+import { UintOptRleDecoder, UintOptRleEncoder } from "./uint-opt-rle"
 
 /**
  * Optimized String Encoder.
@@ -41,5 +42,45 @@ export class StringEncoder implements StatefulEncoder<string> {
         writeVarString(encoder, this.sarr.join(''))
         writeUint8Array(encoder, this.lensE.toUint8Array())
         return encoder.toUint8Array()
+    }
+
+    reset() {
+        this.sarr = []
+        this.s = ''
+        this.lensE.reset()
+    }
+}
+
+export class StringDecoder implements StatefulDecoder<string> {
+    decoder: UintOptRleDecoder
+    str: string
+    spos: number
+
+    /**
+     * @param {Uint8Array} uint8Array
+     */
+    constructor (uint8Array: Uint8Array) {
+        this.decoder = new UintOptRleDecoder(uint8Array)
+        this.str = readVarString(this.decoder)
+        /**
+         * @type {number}
+         */
+        this.spos = 0
+    }
+
+    /**
+     * @return {string}
+     */
+    read () {
+        const end = this.spos + this.decoder.read()
+        const res = this.str.slice(this.spos, end)
+        this.spos = end
+        return res
+    }
+
+    reset() {
+        this.decoder.reset()
+        this.str = readVarString(this.decoder)
+        this.spos = 0
     }
 }

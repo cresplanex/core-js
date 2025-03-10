@@ -1,3 +1,5 @@
+import * as mathUtil from "../utils/math"
+import { Decoder, readVarInt, readVarUint, StatefulDecoder } from "./decoding"
 import { Encoder, StatefulEncoder, writeVarInt, writeVarUint } from "./encoding"
 
 /**
@@ -25,9 +27,6 @@ export class IntDiffOptRleEncoder implements StatefulEncoder<number> {
 
     constructor () {
         this.encoder = new Encoder()
-        /**
-         * @type {number}
-         */
         this.s = 0
         this.count = 0
         this.diff = 0
@@ -57,6 +56,13 @@ export class IntDiffOptRleEncoder implements StatefulEncoder<number> {
         flushIntDiffOptRleEncoder(this)
         return this.encoder.toUint8Array()
     }
+
+    reset() {
+        this.encoder.reset()
+        this.s = 0
+        this.count = 0
+        this.diff = 0
+    }
 }
 
 /**
@@ -74,5 +80,47 @@ const flushIntDiffOptRleEncoder = (encoder: IntDiffOptRleEncoder) => {
         if (encoder.count > 1) {
             writeVarUint(encoder.encoder, encoder.count - 2) // since count is always > 1, we can decrement by one. non-standard encoding ftw
         }
+    }
+}
+
+export class IntDiffOptRleDecoder extends Decoder implements StatefulDecoder<number> {
+    s: number
+    count: number
+    diff: number
+
+    /**
+     * @param {Uint8Array} uint8Array
+     */
+    constructor (uint8Array: Uint8Array) {
+        super(uint8Array)
+        this.s = 0
+        this.count = 0
+        this.diff = 0
+    }
+
+    /**
+     * @return {number}
+     */
+    read () {
+        if (this.count === 0) {
+            const diff = readVarInt(this)
+            // if the first bit is set, we read more data
+            const hasCount = diff & 1
+            this.diff = mathUtil.floor(diff / 2) // shift >> 1
+            this.count = 1
+            if (hasCount) {
+                this.count = readVarUint(this) + 2
+            }
+        }
+        this.s += this.diff
+        this.count--
+        return this.s
+    }
+
+    reset() {
+        Decoder.prototype.reset.call(this)
+        this.s = 0
+        this.count = 0
+        this.diff = 0
     }
 }

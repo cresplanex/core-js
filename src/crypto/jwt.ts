@@ -1,15 +1,15 @@
-import * as error from '../utils/error'
-import * as buffer from '../utils/buffer'
+import * as buffer from '../buffer/buffer'
 import * as string from '../utils/string'
 import * as json from '../utils/json'
 import * as ecdsa from './ecdsa'
 import * as time from '../utils/time'
+import { unexpectedCaseErr } from '../error'
 
 /**
  * @param {Object} data
  */
 const _stringify = (data: Object): string => {
-    const encodedData = string.utf8TextEncoder(json.stringify(data))
+    const encodedData = string.utf8TextEncoder.encode(json.stringify(data))
     if (!encodedData) {
         throw new Error('Failed to encode data')
     }
@@ -20,7 +20,7 @@ const _stringify = (data: Object): string => {
  * @param {string} base64url
  */
 const _parse = (base64url: string): any => {
-    const decodedData = string.decodeUtf8(buffer.fromBase64UrlEncoded(base64url))
+    const decodedData = string.utf8TextDecoder.decode(buffer.fromBase64UrlEncoded(base64url))
     if (!decodedData) {
         throw new Error('Failed to decode data')
     }
@@ -34,14 +34,14 @@ const _parse = (base64url: string): any => {
 export const encodeJwt = (privateKey: CryptoKey, payload: Object): PromiseLike<string> => {
     const { name: algName, namedCurve: algCurve } = privateKey.algorithm as EcKeyAlgorithm
     if (algName !== 'ECDSA' || algCurve !== 'P-384') {
-        error.unexpectedCase()
+        throw unexpectedCaseErr
     }
     const header = {
         alg: 'ES384',
         typ: 'JWT'
     }
     const jwt = _stringify(header) + '.' + _stringify(payload)
-    const encoded = string.utf8TextEncoder(jwt)
+    const encoded = string.utf8TextEncoder.encode(jwt)
     if (!encoded) {
         throw new Error('Failed to encode data')
     }
@@ -56,7 +56,7 @@ export const encodeJwt = (privateKey: CryptoKey, payload: Object): PromiseLike<s
  */
 export const verifyJwt = async (publicKey: CryptoKey, jwt: string): Promise<{ header: Object, payload: Object }> => {
     const [headerBase64, payloadBase64, signatureBase64] = jwt.split('.')
-    const encoded = string.utf8TextEncoder(headerBase64 + '.' + payloadBase64)
+    const encoded = string.utf8TextEncoder.encode(headerBase64 + '.' + payloadBase64)
     if (!encoded) {
         throw new Error('Failed to encode data')
     }

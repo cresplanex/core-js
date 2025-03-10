@@ -5,7 +5,8 @@
  * @module rabin-uncached
  */
 
-import { bufferUtil, mathUtil } from "../utils"
+import { shiftNBitsLeft } from "../buffer"
+import { mathUtil } from "../utils"
 
 export class RabinUncachedEncoder {
     m: Uint8Array
@@ -55,7 +56,7 @@ export class RabinUncachedEncoder {
         // mod
         for (let i = 7; i >= 0; i--) {
         if (((this.bs[this.bpos] >>> i) & 1) === 1) {
-            this.add(bufferUtil.shiftNBitsLeft(this.m, i))
+            this.add(shiftNBitsLeft(this.m, i))
         }
         }
         // if (this.bs[this.bpos] !== 0) { error.unexpectedCase() }

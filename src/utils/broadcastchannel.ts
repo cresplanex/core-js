@@ -19,7 +19,7 @@
 
 import { CoreMap } from '../structure/map.js'
 import { CoreSet } from '../structure/set.js'
-import * as buffer from './buffer'
+import * as buffer from '../buffer/buffer.js'
 import * as storage from '../storage'
 
 /**

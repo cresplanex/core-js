@@ -8,7 +8,7 @@ export { exportKeyJwk } from './common'
 /**
  * @typedef {Array<'encrypt'|'decrypt'>} Usages
  */
-type Usages = ('encrypt' | 'decrypt')[]
+export type Usages = ('encrypt' | 'decrypt')[]
 
 /**
  * @type {Usages}
@@ -25,7 +25,7 @@ const defaultUsages: Usages = ['encrypt', 'decrypt']
 export const encrypt = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Array> =>
     webcrypto.subtle.encrypt(
         {
-        name: 'RSA-OAEP'
+            name: 'RSA-OAEP'
         },
         key,
         data

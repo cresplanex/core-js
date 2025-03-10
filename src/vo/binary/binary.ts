@@ -17,111 +17,117 @@ export class BinaryValueFactory {
         }
     }
 
+    static isBinaryValueFactory(value: BinaryValue|BinaryValueFactory): value is BinaryValueFactory {
+        return value instanceof BinaryValueFactory
+    }
+
     get value(): number {
         return this._innerData
     }
 
-    static or(...args: BinaryValueFactory[]): BinaryValueFactory {
-        return BinaryValueFactory.create(args.reduce((acc, val) => acc | val._innerData, 0))
+    static or(...args: (BinaryValueFactory|BinaryValue)[]): BinaryValueFactory {
+        return BinaryValueFactory.create(args.reduce((acc: number, val) => acc | (BinaryValueFactory.isBinaryValueFactory(val) ? val._innerData : val), 0))
     }
 
-    or(...args: BinaryValueFactory[]): BinaryValueFactory {
+    or(...args: (BinaryValueFactory|BinaryValue)[]): BinaryValueFactory {
         return BinaryValueFactory.or(this, ...args)
     }
 
-    static and(...args: BinaryValueFactory[]): BinaryValueFactory {
-        return BinaryValueFactory.create(args.reduce((acc, val) => acc & val._innerData, 0xFFFFFFFF))
+    static and(...args: (BinaryValueFactory|BinaryValue)[]): BinaryValueFactory {
+        return BinaryValueFactory.create(args.reduce((acc: number, val) => acc & (BinaryValueFactory.isBinaryValueFactory(val) ? val._innerData : val), 0xFFFFFFFF))
     }
 
-    and(...args: BinaryValueFactory[]): BinaryValueFactory {
+    and(...args: (BinaryValueFactory|BinaryValue)[]): BinaryValueFactory {
         return BinaryValueFactory.and(this, ...args)
     }
 
-    static xor(...args: BinaryValueFactory[]): BinaryValueFactory {
-        return BinaryValueFactory.create(args.reduce((acc, val) => acc ^ val._innerData, 0))
+    static xor(...args: (BinaryValueFactory|BinaryValue)[]): BinaryValueFactory {
+        return BinaryValueFactory.create(args.reduce((acc: number, val) => acc ^ (BinaryValueFactory.isBinaryValueFactory(val) ? val._innerData : val), 0))
     }
 
-    xor(...args: BinaryValueFactory[]): BinaryValueFactory {
+    xor(...args: (BinaryValueFactory|BinaryValue)[]): BinaryValueFactory {
         return BinaryValueFactory.xor(this, ...args)
     }
 
-    static not(value: BinaryValueFactory): BinaryValueFactory {
-        return BinaryValueFactory.create(~value._innerData)
+    static not(value: BinaryValueFactory|BinaryValue): BinaryValueFactory {
+        return BinaryValueFactory.create(~(BinaryValueFactory.isBinaryValueFactory(value) ? value._innerData : value))
     }
 
     not(): BinaryValueFactory {
         return BinaryValueFactory.not(this)
     }
 
-    static shiftLeft(value: BinaryValueFactory, shift: number): BinaryValueFactory {
-        return BinaryValueFactory.create(value._innerData << shift)
+    static shiftLeft(value: BinaryValueFactory|BinaryValue, shift: number): BinaryValueFactory {
+        return BinaryValueFactory.create((BinaryValueFactory.isBinaryValueFactory(value) ? value._innerData : value) << shift)
     }
 
     shiftLeft(shift: number): BinaryValueFactory {
         return BinaryValueFactory.shiftLeft(this, shift)
     }
 
-    static shiftRight(value: BinaryValueFactory, shift: number): BinaryValueFactory {
-        return BinaryValueFactory.create(value._innerData >> shift)
+    static shiftRight(value: BinaryValueFactory|BinaryValue, shift: number): BinaryValueFactory {
+        return BinaryValueFactory.create((BinaryValueFactory.isBinaryValueFactory(value) ? value._innerData : value) >> shift)
     }
 
     shiftRight(shift: number): BinaryValueFactory {
         return BinaryValueFactory.shiftRight(this, shift)
     }
 
-    static shiftRightZero(value: BinaryValueFactory, shift: number): BinaryValueFactory {
-        return BinaryValueFactory.create(value._innerData >>> shift)
+    static shiftRightZero(value: BinaryValueFactory|BinaryValue, shift: number): BinaryValueFactory {
+        return BinaryValueFactory.create((BinaryValueFactory.isBinaryValueFactory(value) ? value._innerData : value) >>> shift)
     }
 
     shiftRightZero(shift: number): BinaryValueFactory {
         return BinaryValueFactory.shiftRightZero(this, shift)
     }
 
-    static rotateLeft(value: BinaryValueFactory, shift: number): BinaryValueFactory {
-        return BinaryValueFactory.create((value._innerData << shift) | (value._innerData >>> (32 - shift)))
+    static rotateLeft(value: BinaryValueFactory|BinaryValue, shift: number): BinaryValueFactory {
+        const val = BinaryValueFactory.isBinaryValueFactory(value) ? value._innerData : value
+        return BinaryValueFactory.create((val << shift) | (val >>> (32 - shift)))
     }
 
     rotateLeft(shift: number): BinaryValueFactory {
         return BinaryValueFactory.rotateLeft(this, shift)
     }
 
-    static rotateRight(value: BinaryValueFactory, shift: number): BinaryValueFactory {
-        return BinaryValueFactory.create((value._innerData >>> shift) | (value._innerData << (32 - shift)))
+    static rotateRight(value: BinaryValueFactory|BinaryValue, shift: number): BinaryValueFactory {
+        const val = BinaryValueFactory.isBinaryValueFactory(value) ? value._innerData : value
+        return BinaryValueFactory.create((val >>> shift) | (val << (32 - shift)))
     }
 
     rotateRight(shift: number): BinaryValueFactory {
         return BinaryValueFactory.rotateRight(this, shift)
     }
 
-    static isBitSet(value: BinaryValueFactory, bit: BinaryValueFactory): boolean {
-        return (value._innerData & bit._innerData) !== 0
+    static isBitSet(value: BinaryValueFactory|BinaryValue, bit: BinaryValueFactory|BinaryValue): boolean {
+        return ((BinaryValueFactory.isBinaryValueFactory(value) ? value._innerData : value) & (BinaryValueFactory.isBinaryValueFactory(bit) ? bit._innerData : bit)) !== 0
     }
 
     isBitSet(bit: BinaryValueFactory): boolean {
         return BinaryValueFactory.isBitSet(this, bit)
     }
 
-    static setBit(value: BinaryValueFactory, bit: BinaryValueFactory): BinaryValueFactory {
-        return BinaryValueFactory.create(value._innerData | bit._innerData)
+    static setBit(value: BinaryValueFactory|BinaryValue, bit: BinaryValueFactory|BinaryValue): BinaryValueFactory {
+        return BinaryValueFactory.create((BinaryValueFactory.isBinaryValueFactory(value) ? value._innerData : value) | (BinaryValueFactory.isBinaryValueFactory(bit) ? bit._innerData : bit))
     }
 
     setBit(bit: BinaryValueFactory): BinaryValueFactory {
         return BinaryValueFactory.setBit(this, bit)
     }
 
-    static clearBit(value: BinaryValueFactory, bit: BinaryValueFactory): BinaryValueFactory {
-        return BinaryValueFactory.create(value._innerData & ~bit._innerData)
+    static clearBit(value: BinaryValueFactory|BinaryValue, bit: BinaryValueFactory|BinaryValue): BinaryValueFactory {
+        return BinaryValueFactory.create((BinaryValueFactory.isBinaryValueFactory(value) ? value._innerData : value) & ~(BinaryValueFactory.isBinaryValueFactory(bit) ? bit._innerData : bit))
     }
 
-    clearBit(bit: BinaryValueFactory): BinaryValueFactory {
+    clearBit(bit: BinaryValue|BinaryValueFactory): BinaryValueFactory {
         return BinaryValueFactory.clearBit(this, bit)
     }
 
-    static toggleBit(value: BinaryValueFactory, bit: BinaryValueFactory): BinaryValueFactory {
-        return BinaryValueFactory.create(value._innerData ^ bit._innerData)
+    static toggleBit(value: BinaryValueFactory|BinaryValue, bit: BinaryValueFactory|BinaryValue): BinaryValueFactory {
+        return BinaryValueFactory.create((BinaryValueFactory.isBinaryValueFactory(value) ? value._innerData : value) ^ (BinaryValueFactory.isBinaryValueFactory(bit) ? bit._innerData : bit))
     }
 
-    toggleBit(bit: BinaryValueFactory): BinaryValueFactory {
+    toggleBit(bit: BinaryValue|BinaryValueFactory): BinaryValueFactory {
         return BinaryValueFactory.toggleBit(this, bit)
     }
 

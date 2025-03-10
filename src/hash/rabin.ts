@@ -5,7 +5,7 @@
  * secure. Well suited for fingerprinting.
  */
 
-import * as buffer from '../utils/buffer'
+import * as buffer from '../buffer/buffer'
 import { CoreMap } from '../structure/map'
 
 export const StandardIrreducible8 = new Uint8Array([1, 221])

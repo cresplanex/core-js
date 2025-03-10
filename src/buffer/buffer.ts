@@ -1,16 +1,10 @@
-/**
- * Utility functions to work with buffers (Uint8Array).
- *
- * @module buffer
- */
-
-import * as string from './string'
-import * as env from './environment'
+import * as string from '../utils/string'
+import * as env from '../env/environment'
 import { CoreArray } from '../structure/array'
-import * as math from './math'
-import * as encoding from '../encode/encoding'
-import * as decoding from '../decode/decoding'
-import { numberUtil } from '.'
+import * as math from '../utils/math'
+import * as numberUtil from '../utils/number'
+import { encoding } from '..'
+import { readAny, writeAny } from '../encode'
 
 /**
  * @param {number} len
@@ -120,44 +114,44 @@ export const fromHexString = (hex: string) => {
  * @param {Uint8Array} uint8Array
  * @return {Uint8Array}
  */
-export const copyUint8Array = (uint8Array: Uint8Array) => {
+export const copyUint8Array = (uint8Array: Uint8Array): Uint8Array => {
     const newBuf = createUint8ArrayFromLen(uint8Array.byteLength)
     newBuf.set(uint8Array)
     return newBuf
 }
 
-// /**
-//  * Encode anything as a UInt8Array. It's a pun on typescripts's `any` type.
-//  * See encoding.writeAny for more information.
-//  *
-//  * @param {any} data
-//  * @return {Uint8Array}
-//  */
-// export const encodeAny = (data: any) =>
-//   encoding.encode(encoder => encoder.writeAny(data))
+/**
+ * Encode anything as a UInt8Array. It's a pun on typescripts's `any` type.
+ * See encoding.writeAny for more information.
+ *
+ * @param {any} data
+ * @return {Uint8Array}
+ */
+export const encodeAny = (data: any) =>
+    encoding.encode(encoder => writeAny(encoder, data))
 
-// /**
-//  * Decode an any-encoded value.
-//  *
-//  * @param {Uint8Array} buf
-//  * @return {any}
-//  */
-// export const decodeAny = (buf: Uint8Array) =>
-//     decoding.CoreDecoder.readAny(decoding.CoreDecoder.create(buf))
+/**
+ * Decode an any-encoded value.
+ *
+ * @param {Uint8Array} buf
+ * @return {any}
+ */
+export const decodeAny = (buf: Uint8Array) =>
+    readAny(encoding.Decoder.create(buf))
 
-// /**
-//  * Shift Byte Array {N} bits to the left. Does not expand byte array.
-//  *
-//  * @param {Uint8Array} bs
-//  * @param {number} N should be in the range of [0-7]
-//  */
-// export const shiftNBitsLeft = (bs: Uint8Array, N: number) => {
-//     if (N === 0) return bs
-//     bs = new Uint8Array(bs)
-//     bs[0] <<= N
-//     for (let i = 1; i < bs.length; i++) {
-//         bs[i - 1] |= bs[i] >>> (8 - N)
-//         bs[i] <<= N
-//     }
-//     return bs
-// }
+/**
+ * Shift Byte Array {N} bits to the left. Does not expand byte array.
+ *
+ * @param {Uint8Array} bs
+ * @param {number} N should be in the range of [0-7]
+ */
+export const shiftNBitsLeft = (bs: Uint8Array, N: number) => {
+    if (N === 0) return bs
+    bs = new Uint8Array(bs)
+    bs[0] <<= N
+    for (let i = 1; i < bs.length; i++) {
+        bs[i - 1] |= bs[i] >>> (8 - N)
+        bs[i] <<= N
+    }
+    return bs
+}

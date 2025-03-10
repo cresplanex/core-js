@@ -44,7 +44,7 @@ export const emitCustomEvent = (el: HTMLElement, name: string, opts: Object) => 
  * @return {Element}
  */
 export const setAttributes = (el: Element, attrs: Array<pair.CorePair<string, string|boolean>>): Element => {
-    pair.forEach(attrs, (key, value) => {
+    pair.CorePairList.forEach(attrs, (key, value) => {
         if (value === false) {
             el.removeAttribute(key)
         } else if (value === true) {
@@ -117,7 +117,7 @@ export const removeEventListener = (el: EventTarget, name: string, f: EventListe
  * @return {Node}
  */
 export const addEventListeners = (node: Node, listeners: Array<pair.CorePair<string, EventListener>>): Node => {
-    pair.forEach(listeners, (name, f) => addEventListener(node, name, f))
+    pair.CorePairList.forEach(listeners, (name, f) => addEventListener(node, name, f))
     return node
 }
 
@@ -127,7 +127,7 @@ export const addEventListeners = (node: Node, listeners: Array<pair.CorePair<str
  * @return {Node}
  */
 export const removeEventListeners = (node: Node, listeners: Array<pair.CorePair<string, EventListener>>): Node => {
-    pair.forEach(listeners, (name, f) => removeEventListener(node, name, f))
+    pair.CorePairList.forEach(listeners, (name, f) => removeEventListener(node, name, f))
     return node
 }
 

@@ -9,10 +9,11 @@
  * 
  * @module encoding
  */
-import * as number from '../utils/number'
+import * as numberUtil from '../utils/number'
+import * as mathUtil from "../utils/math"
+import * as stringUtil from "../utils/string"
 import * as binary from '../vo/binary'
 import { CoreArray } from '../structure/array'
-import { mathUtil, stringUtil } from '../utils'
 
 /**
  * A BinaryEncoder handles the encoding to an Uint8Array.
@@ -76,11 +77,21 @@ export class Encoder {
     verifyLen (len: number) {
         Encoder.verifyLen(this, len)
     }
+
+    static reset (encoder: Encoder) {
+        encoder.cpos = 0
+        encoder.bufs = []
+    }
+
+    reset () {
+        Encoder.reset(this)
+    }
 }
 
 export interface StatefulEncoder<T> {
     toUint8Array: () => Uint8Array
     write: (value: T) => void
+    reset: () => void
 }
 
 /**
@@ -92,7 +103,7 @@ export const encode = (f: (encoder: Encoder) => void): Uint8Array => {
     return encoder.toUint8Array()
 }
 
-export type EncoderWriter<T> = (encoder: Encoder, value: T) => void
+export type EncodeWriter<T> = (encoder: Encoder, value: T) => void
 
 export function write (encoder: Encoder, num: number) {
     const bufferLen = encoder.cbuf.length
@@ -129,7 +140,7 @@ export function setUint8 (encoder: Encoder, pos: number, num: number) {
 }
 
 function uint16ToUint8(num: number): [number, number] {
-    return [num & binary.BITS8.value, (num >>> 8) & binary.BITS8.value]
+    return [binary.BITS8.and(num).value, binary.BITS8.and(num >>> 8).value]
 }
 
 export function writeUint16 (encoder: Encoder, num: number) {
@@ -146,30 +157,30 @@ export function setUint16 (encoder: Encoder, pos: number, num: number) {
 
 export function writeUint32 (encoder: Encoder, num: number) {
     for (let i = 0; i < 4; i++) {
-        write(encoder, num & binary.BITS8.value)
+        write(encoder, binary.BITS8.and(num).value)
         num >>>= 8
     }
 }
 
 export function writeUint32BigEndian (encoder: Encoder, num: number) {
     for (let i = 3; i >= 0; i--) {
-        write(encoder, (num >>> (8 * i)) & binary.BITS8.value)
+        write(encoder, binary.BITS8.and(num >>> (8 * i)).value)
     }
 }
 
 export function setUint32 (encoder: Encoder, pos: number, num: number) {
     for (let i = 0; i < 4; i++) {
-        set(encoder, pos + i, num & binary.BITS8.value)
+        set(encoder, pos + i, binary.BITS8.and(num).value)
         num >>>= 8
     }
 }
 
 export function writeVarUint (encoder: Encoder, num: number) {
     while (num > binary.BITS7.value) {
-        write(encoder, binary.BIT8.value | (binary.BITS7.value & num))
+        write(encoder, binary.BIT8.or(binary.BITS7.and(num).value).value)
         num = mathUtil.floor(num / 128) // shift >>> 7
     }
-    write(encoder, binary.BITS7.value & num)
+    write(encoder, binary.BITS7.and(num).value)
 }
 
 export function writeVarInt (encoder: Encoder, num: number) {
@@ -177,10 +188,10 @@ export function writeVarInt (encoder: Encoder, num: number) {
     if (isNegative) {
         num = -num
     }
-    write(encoder, (num > binary.BITS6.value ? binary.BIT8.value : 0) | (isNegative ? binary.BIT7.value : 0) | (binary.BITS6.value & num))
+    write(encoder, (num > binary.BITS6.value ? binary.BIT8.value : 0) | (isNegative ? binary.BIT7.value : 0) | (binary.BITS6.and(num).value))
     num = mathUtil.floor(num / 64) // shift >>> 6
     while (num > 0) {
-        write(encoder, (num > binary.BITS7.value ? binary.BIT8.value : 0) | (binary.BITS7.value & num))
+        write(encoder, (num > binary.BITS7.value ? binary.BIT8.value : 0) | (binary.BITS7.and(num).value))
         num = mathUtil.floor(num / 128) // shift >>> 7
     }
 }
@@ -429,7 +440,7 @@ export function writeAny (encoder: Encoder, data: any) {
             writeVarString(encoder, data)
             break
         case 'number':
-            if (number.isInteger(data) && mathUtil.abs(data) <= binary.BITS31.value) {
+            if (numberUtil.isInteger(data) && mathUtil.abs(data) <= binary.BITS31.value) {
                 // TYPE 125: INTEGER
                 write(encoder, 125)
                 writeVarInt(encoder, data)

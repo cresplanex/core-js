@@ -5,10 +5,10 @@
  */
 
 import { CoreMap } from "../structure";
-import * as stringUtils from './string';
-import * as nullUtils from './null';
+import * as stringUtils from '../utils/string';
+import * as nullUtils from '../utils/null';
 import * as storage from '../storage'
-import * as f from './function';
+import * as f from '../utils/function';
 
 /**
  * isNode is true if the code is running in a Node.js environment.

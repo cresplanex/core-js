@@ -3,15 +3,15 @@
  */
 
 import * as encoding from '../encode/encoding'
-import * as decoding from '../decode/decoding'
+import * as decoding from '../encode/decoding'
 import * as webcrypto from '../csprng'
-import { stringUtil } from '../utils'
+import * as stringUtil from '../utils/string'
 export { exportKeyJwk, exportKeyRaw } from './common'
 
 /**
  * @typedef {Array<'encrypt'|'decrypt'>} Usages
  */
-type Usages = ('encrypt' | 'decrypt')[]
+export type Usages = ('encrypt' | 'decrypt')[]
 
 /**
  * @type {Usages}
@@ -26,7 +26,7 @@ export const encrypt = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Arra
     const iv = webcrypto.getRandomValues(new Uint8Array(16)) // 92bit is enough. 128bit is recommended if space is not an issue.
     return webcrypto.subtle.encrypt(
         {
-        name: 'AES-GCM',
+            name: 'AES-GCM',
         iv
         },
         key,
@@ -34,8 +34,8 @@ export const encrypt = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Arra
     ).then(cipher => {
         const encryptedDataEncoder = encoding.Encoder.create()
         // iv may be sent in the clear to the other peers
-        encryptedDataEncoder.writeUint8Array(iv)
-        encryptedDataEncoder.writeVarUint8Array(new Uint8Array(cipher))
+        encoding.writeUint8Array(encryptedDataEncoder, iv)
+        encoding.writeVarUint8Array(encryptedDataEncoder, new Uint8Array(cipher))
         return encryptedDataEncoder.toUint8Array()
     })
 }
@@ -50,13 +50,13 @@ export const encrypt = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Arra
  * @return {PromiseLike<Uint8Array>} decrypted buffer
  */
 export const decrypt = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Array> => {
-    const dataDecoder = decoding.CoreDecoder.create(data)
-    const iv = dataDecoder.readUint8Array(16)
-    const cipher = dataDecoder.readVarUint8Array()
+    const dataDecoder = decoding.Decoder.create(data)
+    const iv = decoding.readUint8Array(dataDecoder, 16)
+    const cipher = decoding.readVarUint8Array(dataDecoder)
     return webcrypto.subtle.decrypt(
         {
-        name: 'AES-GCM',
-        iv
+            name: 'AES-GCM',
+            iv
         },
         key,
         cipher
@@ -102,7 +102,7 @@ export const importKeyRaw = (raw: Uint8Array, { usages = defaultUsages, extracta
  * @param {Uint8Array | string} data
  */
 const toBinary = (data: Uint8Array | string) => {
-    const encoded = typeof data === 'string' ? stringUtil.utf8TextEncoder(data) : data
+    const encoded = typeof data === 'string' ? stringUtil.utf8TextEncoder.encode(data) : data
     if (!encoded) {
         throw new Error('Failed to encode data')
     }
@@ -120,10 +120,17 @@ const toBinary = (data: Uint8Array | string) => {
  * @param {boolean} [opts.extractable]
  * @param {Usages} [opts.usages]
  */
-export const deriveKey = (secret: Uint8Array|string, salt: Uint8Array|string, { extractable = false, usages = defaultUsages }: {
-    extractable?: boolean
-    usages?: Usages
-} = {}) =>
+export const deriveKey = (
+    secret: Uint8Array|string, 
+    salt: Uint8Array|string, 
+    { 
+        extractable = false, 
+        usages = defaultUsages 
+    }: {
+        extractable?: boolean
+        usages?: Usages
+    } = {}
+) =>
     webcrypto.subtle.importKey(
         'raw',
         toBinary(secret),

@@ -4,16 +4,15 @@
  * @module logging
  */
 
-import * as env from '../utils/environment'
+import * as env from '../env/environment'
 import { CoreSet } from '../structure/set'
 import * as pair from '../structure/pair'
 import * as dom from '../utils/dom'
 import * as json from '../utils/json'
 import { CoreMap } from '../structure/map'
-import * as eventloop from '../utils/eventloop'
+import * as eventloop from '../event/eventloop'
 import * as math from '../utils/math'
 import * as common from './common'
-import { CoreSymbol } from '../structure/symbol'
 
 export { BOLD, UNBOLD, BLUE, GREY, GREEN, RED, PURPLE, ORANGE, UNCOLOR } from './common'
 
@@ -21,23 +20,22 @@ export { BOLD, UNBOLD, BLUE, GREY, GREEN, RED, PURPLE, ORANGE, UNCOLOR } from '.
  * @type {Object<Symbol,pair.CorePair<string,string>>}
  */
 const _browserStyleMap = {
-  [common.BOLD.value]: pair.CorePair.create('font-weight', 'bold'),
-  [common.UNBOLD.value]: pair.CorePair.create('font-weight', 'normal'),
-  [common.BLUE.value]: pair.CorePair.create('color', 'blue'),
-  [common.GREEN.value]: pair.CorePair.create('color', 'green'),
-  [common.GREY.value]: pair.CorePair.create('color', 'grey'),
-  [common.RED.value]: pair.CorePair.create('color', 'red'),
-  [common.PURPLE.value]: pair.CorePair.create('color', 'purple'),
-  [common.ORANGE.value]: pair.CorePair.create('color', 'orange'), // not well supported in chrome when debugging node with inspector - TODO: deprecate
-  [common.UNCOLOR.value]: pair.CorePair.create('color', 'black')
+  [common.BOLD]: pair.CorePair.create('font-weight', 'bold'),
+  [common.UNBOLD]: pair.CorePair.create('font-weight', 'normal'),
+  [common.BLUE]: pair.CorePair.create('color', 'blue'),
+  [common.GREEN]: pair.CorePair.create('color', 'green'),
+  [common.GREY]: pair.CorePair.create('color', 'grey'),
+  [common.RED]: pair.CorePair.create('color', 'red'),
+  [common.PURPLE]: pair.CorePair.create('color', 'purple'),
+  [common.ORANGE]: pair.CorePair.create('color', 'orange'), // not well supported in chrome when debugging node with inspector - TODO: deprecate
+  [common.UNCOLOR]: pair.CorePair.create('color', 'black')
 }
 
 /**
  * @param {Array<string|Symbol|Object|number|function():any>} args
  * @return {Array<string|object|number>}
  */
-/* c8 ignore start */
-const computeBrowserLoggingArgs = (args: Array<string|CoreSymbol|Symbol|Object|number|(() => any)>): Array<string|object|number> => {
+const computeBrowserLoggingArgs = (args: Array<string|Symbol|Object|number|(() => any)>): Array<string|object|number> => {
   if (args.length === 1 && args[0]?.constructor === Function) {
     args = (args[0] as () => any)()
   }
@@ -52,9 +50,6 @@ const computeBrowserLoggingArgs = (args: Array<string|CoreSymbol|Symbol|Object|n
   let i = 0
   for (; i < args.length; i++) {
     let arg = args[i]
-    if (arg instanceof CoreSymbol) {
-      arg = arg.value
-    }
     // @ts-ignore
     const style = _browserStyleMap[arg]
     if (style !== undefined) {
@@ -84,9 +79,6 @@ const computeBrowserLoggingArgs = (args: Array<string|CoreSymbol|Symbol|Object|n
   // append the rest
   for (; i < args.length; i++) {
     let arg = args[i]
-    if (arg instanceof CoreSymbol) {
-      arg = arg.value
-    }
     if (!(arg instanceof Symbol)) {
       logArgs.push(arg)
     }
@@ -99,20 +91,19 @@ const computeLoggingArgs = env.supportsColor
   : common.computeNoColorLoggingArgs
 
 /**
- * @param {Array<string|CoreSymbol|Symbol|Object|number>} args
+ * @param {Array<string|Symbol|Object|number>} args
  */
-export const print = (...args: Array<string|CoreSymbol|Symbol|Object|number>) => {
+export const print = (...args: Array<string|Symbol|Object|number>) => {
   console.log(...computeLoggingArgs(args))
   vconsoles.forEach((vc) => vc.print(args))
 }
 
-/* c8 ignore start */
 /**
- * @param {Array<string|CoreSymbol|Symbol|Object|number>} args
+ * @param {Array<string|Symbol|Object|number>} args
  */
-export const warn = (...args: Array<string|CoreSymbol|Symbol|Object|number>) => {
+export const warn = (...args: Array<string|Symbol|Object|number>) => {
   console.warn(...computeLoggingArgs(args))
-  args.unshift(common.ORANGE.value)
+  args.unshift(common.ORANGE)
   vconsoles.forEach((vc) => vc.print(args))
 }
 
@@ -123,13 +114,11 @@ export const printError = (err: Error) => {
   console.error(err)
   vconsoles.forEach((vc) => vc.printError(err))
 }
-/* c8 ignore stop */
 
 /**
  * @param {string} url image location
  * @param {number} height height of the image in pixel
  */
-/* c8 ignore start */
 export const printImg = (url: string, height: number) => {
   if (env.isBrowser) {
     console.log(
@@ -149,17 +138,17 @@ export const printImgBase64 = (base64: string, height: number) =>
   printImg(`data:image/gif;base64,${base64}`, height)
 
 /**
- * @param {Array<string|CoreSymbol|Symbol|Object|number>} args
+ * @param {Array<string|Symbol|Object|number>} args
  */
-export const group = (...args: Array<string|CoreSymbol|Symbol|Object|number>) => {
+export const group = (...args: Array<string|Symbol|Object|number>) => {
   console.group(...computeLoggingArgs(args))
   vconsoles.forEach((vc) => vc.group(args))
 }
 
 /**
- * @param {Array<string|CoreSymbol|Symbol|Object|number>} args
+ * @param {Array<string|Symbol|Object|number>} args
  */
-export const groupCollapsed = (...args: Array<string|CoreSymbol|Symbol|Object|number>) => {
+export const groupCollapsed = (...args: Array<string|Symbol|Object|number>) => {
   console.groupCollapsed(...computeLoggingArgs(args))
   vconsoles.forEach((vc) => vc.groupCollapsed(args))
 }
@@ -186,10 +175,10 @@ export const printCanvas = (canvas: HTMLCanvasElement, height: number) =>
 export const vconsoles = CoreSet.create<VConsole>()
 
 /**
- * @param {Array<string|CoreSymbol|Symbol|Object|number>} args
+ * @param {Array<string|Symbol|Object|number>} args
  * @return {Array<Element>}
  */
-const _computeLineSpans = (args: Array<string|CoreSymbol|Symbol|Object|number>): Array<Element> => {
+const _computeLineSpans = (args: Array<string|Symbol|Object|number>): Array<Element> => {
   const spans: Array<Element> = []
   const currentStyle = new CoreMap<string, string>()
   // try with formatting until we find something unsupported
@@ -236,12 +225,10 @@ const _computeLineSpans = (args: Array<string|CoreSymbol|Symbol|Object|number>):
   }
   return spans
 }
-/* c8 ignore stop */
 
 const lineStyle =
   'font-family:monospace;border-bottom:1px solid #e2e2e2;padding:2px;'
 
-/* c8 ignore start */
 export class VConsole {
   dom: Element
   ccontainer: Element
@@ -252,9 +239,6 @@ export class VConsole {
    */
   constructor (dom: Element) {
     this.dom = dom
-    /**
-     * @type {Element}
-     */
     this.ccontainer = this.dom
     this.depth = 0
     vconsoles.add(this)
@@ -376,12 +360,10 @@ export class VConsole {
     })
   }
 }
-/* c8 ignore stop */
 
 /**
  * @param {Element} dom
  */
-/* c8 ignore next */
 export const createVConsole = (dom: Element) => new VConsole(dom)
 
 /**

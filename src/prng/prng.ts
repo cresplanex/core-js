@@ -6,7 +6,8 @@
  *
  * @module prng
  */
-import { mathUtil, stringUtil, bufferUtil } from '../utils'
+import { createUint8ArrayFromLen } from '../buffer'
+import { mathUtil, stringUtil } from '../utils'
 import { binary } from '../vo'
 
 export abstract class Prng {
@@ -210,7 +211,7 @@ export abstract class Prng {
      * @return {Uint8Array} A random Uint8Array of length len.
      */
     uint8Array(len: number): Uint8Array {
-        return bufferUtil.createUint8ArrayFromLen(len).map(() => this.int32(0, binary.BITS8.value))
+        return createUint8ArrayFromLen(len).map(() => this.int32(0, binary.BITS8.value))
     }
 
     /**

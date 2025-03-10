@@ -1,10 +1,10 @@
 import { PrimitiveType, PrimitiveTypes } from "../vo/primitive";
-import { CoreBinary } from "../structure/binary";
+import * as binary from "../vo/binary";
 
 export type PrimitiveFunctionType = {
     name: string;
     description: string;
-    args: { name: string, type: CoreBinary, varlength: boolean, optional: boolean }[];
+    args: { name: string, type: binary.BinaryValue, varlength: boolean, optional: boolean }[];
     returnType: PrimitiveType;
 }
 

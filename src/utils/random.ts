@@ -15,7 +15,7 @@ let _uint53Func: () => number = Math.random
 if (crypto) {
     _uint53Func = () => {
         const arr = getRandomValues(new Uint32Array(8))
-        return (arr[0] & binary.BITS21.value) * (binary.BITS32.value + 1) + (arr[1] >>> 0)
+        return (binary.BITS21.and(arr[0]).value) * (binary.BITS32.value + 1) + (arr[1] >>> 0)
     }
 }
 
