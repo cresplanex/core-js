@@ -4,8 +4,8 @@
  * @module dom
  */
 
-import * as pair from '../structure/pair.js'
-import { CoreMap } from '../structure/map.js'
+import * as pair from '../structure/pair'
+import { CoreMap } from '../structure/map'
 
 /**
  * @type {Document}

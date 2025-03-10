@@ -7,8 +7,6 @@
 import * as env from '../env/environment'
 import * as common from './common'
 
-export { BOLD, UNBOLD, BLUE, GREY, GREEN, RED, PURPLE, ORANGE, UNCOLOR } from './common'
-
 const _nodeStyleMap = {
     [common.BOLD]: '\u001b[1m',
     [common.UNBOLD]: '\u001b[2m',
@@ -58,7 +56,7 @@ const computeNodeLoggingArgs = (args: Array<string|undefined|Symbol|Object|numbe
     for (; i < args.length; i++) {
         let arg = args[i]
         if (!(arg instanceof Symbol)) {
-        logArgs.push(arg)
+            logArgs.push(arg)
         }
     }
     return logArgs
