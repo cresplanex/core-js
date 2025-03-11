@@ -25,34 +25,25 @@ import * as storage from '../storage'
  * @property {Set<function(any, any):any>} Channel.subs
  * @property {any} Channel.bc
  */
-
 type Channel = {
-  subs: CoreSet<Function>,
-  bc: any
+    subs: CoreSet<((data: any, origin: any) => any)|string>,
+    bc: any,
 }
 
-/**
- * @type {Map<string, Channel>}
- */
 const channels = new CoreMap<string, Channel>()
+const chanelFuncMap = new CoreMap<string, (data: any, origin: any) => any>()
 
 class LocalStoragePolyfill {
     room: string
-    onmessage: null | Function
-    _onChange: (e: any) => void
+    onmessage: null | ((e: { data: ArrayBuffer }) => void)
+    _onChange: (this: Window, ev: WindowEventMap["storage"]) => any
     
     /**
      * @param {string} room
      */
     constructor (room: string) {
       this.room = room
-      /**
-       * @type {null|function({data:ArrayBuffer}):void}
-       */
       this.onmessage = null
-      /**
-       * @param {any} e
-       */
       this._onChange = e => e.key === room && this.onmessage !== null && this.onmessage({ data: buffer.fromBase64(e.newValue || '') })
       storage.onChange(this._onChange)
     }
@@ -76,20 +67,25 @@ const BC = typeof BroadcastChannel === 'undefined' ? LocalStoragePolyfill : Broa
  * @param {string} room
  * @return {Channel}
  */
-const getChannel = (room: string) =>
+const getChannel = (room: string): Channel =>
     channels.setIfUndefined(room, () => {
-      const subs = CoreSet.create<Function>();
-      const bc = new BC(room)
-      /**
-       * @param {{data:ArrayBuffer}} e
-       */
-      bc.onmessage = e => subs.forEach(
-        (sub: Function) =>
-          sub(e.data, 'broadcastchannel'))
-      return {
-        bc, subs
-      }
-  })
+        const subs = CoreSet.create<((data: any, origin: any) => any)|string>()
+        const bc = new BC(room)
+        bc.onmessage = (e: { data: ArrayBuffer }) =>
+          subs.forEach((sub: ((data: any, origin: any) => any)|string) => {
+            if (typeof sub === 'string') {
+              const f = chanelFuncMap.get(sub)
+              if (f) {
+                f(e.data, 'broadcastchannel')
+              }
+            } else {
+              sub(e.data, 'broadcastchannel')
+            }
+          })
+        return {
+          bc, subs
+        }
+    })
 
 /**
  * Subscribe to global `publish` events.
@@ -98,9 +94,14 @@ const getChannel = (room: string) =>
  * @param {string} room
  * @param {function(any, any):any} f
  */
-export const subscribe = (room: string, f: Function) => {
-  getChannel(room).subs.add(f)
-  return f
+export const subscribe = (room: string, f: (data: any, origin: any) => any, funcName?: string) => {
+    if (funcName) {
+      chanelFuncMap.set(funcName, f)
+      getChannel(room).subs.add(funcName)
+      return f
+    }
+    getChannel(room).subs.add(f)
+    return f
 }
 
 /**
@@ -110,14 +111,25 @@ export const subscribe = (room: string, f: Function) => {
  * @param {string} room
  * @param {function(any, any):any} f
  */
-export const unsubscribe = (room: string, f: Function) => {
-  const channel = getChannel(room)
-  const unsubscribed = channel.subs.delete(f)
-  if (unsubscribed && channel.subs.size === 0) {
-    channel.bc.close()
-    channels.delete(room)
-  }
-  return unsubscribed
+export const unsubscribe = (room: string, f: ((data: any, origin: any) => any)|string) => {
+    const channel = getChannel(room)
+    const unsubscribed = channel.subs.delete(f)
+    if (typeof f === 'string') {
+      chanelFuncMap.delete(f)
+    }
+    if (unsubscribed && channel.subs.size === 0) {
+      channel.bc.close()
+      channels.delete(room)
+    }
+    return unsubscribed
+}
+
+export const forceClose = (room: string) => {
+    const channel = channels.get(room)
+    if (channel) {
+      channel.bc.close()
+      channels.delete(room)
+    }
 }
 
 /**
@@ -129,7 +141,16 @@ export const unsubscribe = (room: string, f: Function) => {
  * @param {any} [origin]
  */
 export const publish = (room: string, data: any, origin = null) => {
-  const c = getChannel(room)
-  c.bc.postMessage(data)
-  c.subs.forEach(sub => sub(data, origin))
+    const c = getChannel(room)
+    c.bc.postMessage(data)
+    c.subs.forEach(sub => {
+      if (typeof sub === 'string') {
+        const f = chanelFuncMap.get(sub)
+        if (f) {
+          f(data, origin)
+        }
+      } else {
+        sub(data, origin)
+      }
+    })
 }

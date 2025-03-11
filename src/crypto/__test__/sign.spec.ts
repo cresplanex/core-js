@@ -6,7 +6,7 @@ describe("Test Signing", () => {
     test('should sign and verify data with ecdsa', async () => {
         const rn = prng.create(0)
 
-        t.measureTimeAsync('time to sign & verify 1 message (ECDSA)', async () => {
+        await t.measureTimeAsync('time to sign & verify 1 message (ECDSA)', async () => {
             const keypair = await ecdsa.generateKeyPair({ extractable: true })
             const data = rn.uint8Array(100)
             const signature = await ecdsa.sign(keypair.privateKey, data)
@@ -14,7 +14,7 @@ describe("Test Signing", () => {
             expect(result).toBeTruthy()
         })
 
-        t.measureTimeAsync('time to sign & verify 2 messages (ECDSA)', async () => {
+        await t.measureTimeAsync('time to sign & verify 2 messages (ECDSA)', async () => {
             const keypair = await ecdsa.generateKeyPair({ extractable: true })
             const keypair2 = await ecdsa.generateKeyPair({ extractable: true })
             const data = rn.uint8Array(100)

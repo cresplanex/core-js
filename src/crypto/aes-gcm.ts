@@ -109,7 +109,6 @@ const toBinary = (data: Uint8Array | string) => {
 }
 
 /**
- * @experimental The API is not final!
  *
  * Derive an AES-GCM symmetric key using PBKDF2.
  *

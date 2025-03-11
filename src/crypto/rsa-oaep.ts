@@ -43,7 +43,7 @@ export const encrypt = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Arra
 export const decrypt = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Array> =>
     webcrypto.subtle.decrypt(
         {
-        name: 'RSA-OAEP'
+            name: 'RSA-OAEP'
         },
         key,
         data
