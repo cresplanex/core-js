@@ -6,7 +6,6 @@ import * as encoding from '../encode/encoding'
 import * as decoding from '../encode/decoding'
 import * as webcrypto from '../csprng'
 import * as stringUtil from '../utils/string'
-export { exportKeyJwk, exportKeyRaw } from './common'
 
 /**
  * @typedef {Array<'encrypt'|'decrypt'>} Usages
@@ -27,7 +26,7 @@ export const encrypt = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Arra
     return webcrypto.subtle.encrypt(
         {
             name: 'AES-GCM',
-        iv
+            iv,
         },
         key,
         data
@@ -74,12 +73,12 @@ const aesAlgDef = {
  * @param {Usages} [opts.usages]
  * @param {boolean} [opts.extractable]
  */
-export const importKeyJwk = (jwk: any, { usages, extractable = false }: {
+export const importKeyJwk = (jwk: JsonWebKey, { usages, extractable = false }: {
     usages?: Usages
     extractable?: boolean
-} = {}) => {
-    if (usages == null) {
-        usages = jwk.key_ops || defaultUsages
+} = {}): PromiseLike<CryptoKey> => {
+    if (usages === undefined) {
+        usages = (jwk.key_ops as Usages) || defaultUsages
     }
     return webcrypto.subtle.importKey('jwk', jwk, 'AES-GCM', extractable, usages as ReadonlyArray<KeyUsage>)
 }
@@ -95,7 +94,7 @@ export const importKeyJwk = (jwk: any, { usages, extractable = false }: {
 export const importKeyRaw = (raw: Uint8Array, { usages = defaultUsages, extractable = false }: {
     usages?: Usages
     extractable?: boolean
-} = {}) =>
+} = {}): PromiseLike<CryptoKey> =>
     webcrypto.subtle.importKey('raw', raw, aesAlgDef, extractable, usages)
 
 /**
@@ -112,42 +111,62 @@ const toBinary = (data: Uint8Array | string) => {
 /**
  * @experimental The API is not final!
  *
- * Derive an symmetric key using the Password-Based-Key-Derivation-Function-2.
+ * Derive an AES-GCM symmetric key using PBKDF2.
  *
- * @param {Uint8Array|string} secret
- * @param {Uint8Array|string} salt
- * @param {Object} opts
- * @param {boolean} [opts.extractable]
- * @param {Usages} [opts.usages]
+ * @param {Uint8Array|string} secret - The secret input (password or similar).
+ * @param {Uint8Array|string} salt - The salt value (minimum 8 bytes recommended).
+ * @param {Object} opts - Options for key derivation.
+ * @param {boolean} [opts.extractable=false] - Whether the derived key is extractable.
+ * @param {Usages} [opts.usages=['encrypt', 'decrypt']] - Key usages.
+ * @param {number} [opts.iterations=600000] - Number of PBKDF2 iterations.
+ * @param {string} [opts.hash='SHA-256'] - Hash algorithm to use.
+ * @return {Promise<CryptoKey>} The derived CryptoKey.
  */
-export const deriveKey = (
-    secret: Uint8Array|string, 
-    salt: Uint8Array|string, 
-    { 
-        extractable = false, 
-        usages = defaultUsages 
+export const deriveKey = async (
+    secret: Uint8Array | string,
+    salt: Uint8Array | string,
+    {
+        extractable = false,
+        usages = defaultUsages,
+        iterations = 600000,
+        hash = 'SHA-256',
     }: {
-        extractable?: boolean
-        usages?: Usages
+        extractable?: boolean;
+        usages?: Usages;
+        iterations?: number;
+        hash?: string;
     } = {}
-) =>
-    webcrypto.subtle.importKey(
+): Promise<CryptoKey> => {
+    // Convert inputs to Uint8Array
+    const binarySecret = toBinary(secret);
+    const binarySalt = toBinary(salt);
+
+    // if (binarySalt.length < 8) {
+    //     throw new Error('Salt must be at least 8 bytes (64 bits) long');
+    // }
+
+    // Import the raw secret as key material for PBKDF2
+    const keyMaterial = await webcrypto.subtle.importKey(
         'raw',
-        toBinary(secret),
+        binarySecret,
         'PBKDF2',
         false,
         ['deriveKey']
-    ).then(keyMaterial =>
-        webcrypto.subtle.deriveKey(
+    );
+
+    // Derive the AES-GCM key using PBKDF2 with the provided options
+    const derivedKey = await webcrypto.subtle.deriveKey(
         {
             name: 'PBKDF2',
-            salt: toBinary(salt), // NIST recommends at least 64 bits
-            iterations: 600000, // OWASP recommends 600k iterations
-            hash: 'SHA-256'
+            salt: binarySalt,
+            iterations,
+            hash,
         },
         keyMaterial,
-        aesAlgDef,
+        aesAlgDef, // Using the pre-defined AES-GCM algorithm definition
         extractable,
         usages
-        )
-    )
+    );
+
+    return derivedKey;
+};

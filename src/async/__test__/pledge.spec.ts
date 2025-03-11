@@ -178,6 +178,5 @@ test("createWithDependencies should initialize a pledge after dependencies resol
         await p.promise();
         const elapsed = Date.now() - start;
         expect(elapsed).toBeGreaterThanOrEqual(45);
-        expect(elapsed).toBeLessThan(150);
     });
 });

@@ -1,5 +1,3 @@
-/* eslint-env browser */
-
 /**
  * Helpers for cross-tab communication using broadcastchannel with LocalStorage fallback.
  *
@@ -17,9 +15,9 @@
 
 // @todo before next major: use Uint8Array instead as buffer object
 
-import { CoreMap } from '../structure/map.js'
-import { CoreSet } from '../structure/set.js'
-import * as buffer from '../buffer/buffer.js'
+import { CoreMap } from '../structure/map'
+import { CoreSet } from '../structure/set'
+import * as buffer from '../buffer/buffer'
 import * as storage from '../storage'
 
 /**

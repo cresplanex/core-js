@@ -55,7 +55,7 @@ export const decrypt = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Arra
  * @param {Usages} [opts.usages]
  * @return {Promise<CryptoKeyPair>}
  */
-export const generateKeyPair = ({ extractable = false, usages = defaultUsages } = {}) =>
+export const generateKeyPair = ({ extractable = false, usages = defaultUsages } = {}): Promise<CryptoKeyPair> =>
     webcrypto.subtle.generateKey(
         {
             name: 'RSA-OAEP',
@@ -73,12 +73,12 @@ export const generateKeyPair = ({ extractable = false, usages = defaultUsages } 
  * @param {boolean} [opts.extractable]
  * @param {Usages} [opts.usages]
  */
-export const importKeyJwk = (jwk: any, { extractable = false, usages }: {
+export const importKeyJwk = (jwk: JsonWebKey, { extractable = false, usages }: {
     extractable?: boolean
     usages?: Usages
-} = {}) => {
+} = {}): PromiseLike<CryptoKey> => {
     if (usages == null) {
-        usages = jwk.key_ops || defaultUsages
+        usages = (jwk.key_ops as Usages) || defaultUsages
     }
     return webcrypto.subtle.importKey('jwk', jwk, { name: 'RSA-OAEP', hash: 'SHA-256' }, extractable, usages as ReadonlyArray<KeyUsage>)
 }

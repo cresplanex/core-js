@@ -30,11 +30,11 @@ const defaultSignAlgorithm = {
  * @return {PromiseLike<Uint8Array>} signature
  */
 export const sign = (key: CryptoKey, data: Uint8Array): PromiseLike<Uint8Array> =>
-webcrypto.subtle.sign(
-    defaultSignAlgorithm,
-    key,
-    data
-).then(signature => new Uint8Array(signature))
+    webcrypto.subtle.sign(
+        defaultSignAlgorithm,
+        key,
+        data
+    ).then(signature => new Uint8Array(signature))
 
 /**
  * @experimental The API is not final!
@@ -47,12 +47,12 @@ webcrypto.subtle.sign(
  * @return {PromiseLike<boolean>} signature
  */
 export const verify = (key: CryptoKey, signature: Uint8Array, data: Uint8Array): PromiseLike<boolean> =>
-webcrypto.subtle.verify(
-    defaultSignAlgorithm,
-    key,
-    signature,
-    data
-)
+    webcrypto.subtle.verify(
+        defaultSignAlgorithm,
+        key,
+        signature,
+        data
+    )
 
 const defaultKeyAlgorithm = {
     name: 'ECDSA',

@@ -1,10 +1,4 @@
-/**
- * Efficient diffs.
- *
- * @module diff
- */
-
-import { equalityStrict } from './function.js'
+import { equalityStrict } from '../utils/function'
 
 /**
  * A SimpleDiff describes a change on a String.
@@ -67,11 +61,9 @@ export const simpleDiffString = (a: string, b: string): SimpleDiff<string> => {
     }
 }
 
-/**
- * @todo Remove in favor of simpleDiffString
- * @deprecated
- */
-export const simpleDiff = simpleDiffString
+export const patchString = (a: string, diff: SimpleDiff<string>): string => {
+    return a.slice(0, diff.index) + diff.insert + a.slice(diff.index + diff.remove)
+}
 
 /**
  * Create a diff between two arrays. This diff implementation is highly
@@ -88,7 +80,7 @@ export const simpleDiff = simpleDiffString
  * @param {function(T, T):boolean} [compare]
  * @return {SimpleDiff<Array<T>>} The diff description.
  */
-export const simpleDiffArray = <T>(a: T[], b: T[], compare = equalityStrict) => {
+export const simpleDiffArray = <T>(a: T[], b: T[], compare: (a: T, b: T) => boolean = equalityStrict): SimpleDiff<T[]> => {
     let left = 0 // number of same characters counting from left
     let right = 0 // number of same characters counting from right
     while (left < a.length && left < b.length && compare(a[left], b[left])) {
@@ -102,6 +94,10 @@ export const simpleDiffArray = <T>(a: T[], b: T[], compare = equalityStrict) => 
         remove: a.length - left - right,
         insert: b.slice(left, b.length - right)
     }
+}
+
+export const patchArray = <T>(a: T[], diff: SimpleDiff<T[]>): T[] => {
+    return a.slice(0, diff.index).concat(diff.insert, a.slice(diff.index + diff.remove))
 }
 
 /**
