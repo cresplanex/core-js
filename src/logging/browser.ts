@@ -7,7 +7,7 @@
 import * as env from '../env/environment'
 import { CoreSet } from '../structure/set'
 import * as pair from '../structure/pair'
-import * as dom from '../utils/dom'
+import * as dom from '../ui/dom'
 import * as json from '../utils/json'
 import { CoreMap } from '../structure/map'
 import * as eventloop from '../event/eventloop'
@@ -57,7 +57,7 @@ const computeBrowserLoggingArgs = (args: Array<undefined|string|Symbol|Object|nu
         break
       }
       if (arg.constructor === String || arg.constructor === Number) {
-        const style = dom.mapToStyleString(currentStyle.value)
+        const style = dom.mapToStyleString(CoreMap.create(currentStyle.value))
         if (i > 0 || style.length > 0) {
           strBuilder.push('%c' + arg)
           styles.push(style)
@@ -176,8 +176,8 @@ export const vconsoles = CoreSet.create<VConsole>()
  * @param {Array<string|Symbol|Object|number>} args
  * @return {Array<Element>}
  */
-const _computeLineSpans = (args: Array<undefined|string|Symbol|Object|number>): Array<Element> => {
-  const spans: Array<Element> = []
+const _computeLineSpans = (args: Array<undefined|string|Symbol|Object|number>): Array<HTMLSpanElement> => {
+  const spans: Array<HTMLSpanElement> = []
   const currentStyle = new CoreMap<string, string>()
   // try with formatting until we find something unsupported
   let i = 0
@@ -193,9 +193,10 @@ const _computeLineSpans = (args: Array<undefined|string|Symbol|Object|number>): 
         if (!textEl) {
           throw new Error('Could not create text element')
         }
-        const span = dom.element('span', [
-          pair.CorePair.create('style', dom.mapToStyleString(currentStyle.value))
-        ], [textEl])
+        const span = dom.element('span', 
+          pair.CorePairList.create([
+            pair.CorePair.create('style', dom.mapToStyleString(CoreMap.create(currentStyle.value)))
+          ]), [textEl])
         if (span.innerHTML === '') {
           span.innerHTML = '&nbsp;'
         }
@@ -217,7 +218,7 @@ const _computeLineSpans = (args: Array<undefined|string|Symbol|Object|number>): 
         throw new Error('Could not create text element')
       }
       spans.push(
-        dom.element('span', [], [textEl])
+        dom.element('span', pair.CorePairList.createEmpty(), [textEl])
       )
     }
   }
@@ -254,28 +255,33 @@ export class VConsole {
       if (!textElDown || !textElRight || !textElSpace) {
         throw new Error('Could not create text element')
       }
-      const triangleDown = dom.element('span', [
-        pair.CorePair.create('hidden', collapsed),
-        pair.CorePair.create('style', 'color:grey;font-size:120%;')
-      ], [textElDown])
-      const triangleRight = dom.element('span', [
-        pair.CorePair.create('hidden', !collapsed),
-        pair.CorePair.create('style', 'color:grey;font-size:125%;')
-      ], [textElRight])
+      const triangleDown = dom.element('span', 
+        pair.CorePairList.create<string, string|boolean>([
+          pair.CorePair.create('hidden', collapsed),
+          pair.CorePair.create('style', 'color:grey;font-size:120%;')
+        ]),
+      [textElDown])
+      const triangleRight = dom.element('span', 
+        pair.CorePairList.create<string, string|boolean>([
+          pair.CorePair.create('hidden', !collapsed),
+          pair.CorePair.create('style', 'color:grey;font-size:125%;')
+        ]),
+        [textElRight])
       const content = dom.element(
         'div',
-        [pair.CorePair.create(
-          'style',
-          `${lineStyle};padding-left:${this.depth * 10}px`
-        )],
+        pair.CorePairList.create<string, string|boolean>([
+          pair.CorePair.create('style', `${lineStyle};padding-left:${this.depth * 10}px`)
+        ]),
         [triangleDown, triangleRight, textElSpace].concat(
           _computeLineSpans(args)
         )
       )
-      const nextContainer = dom.element('div', [
-        pair.CorePair.create('hidden', collapsed)
-      ])
-      const nextLine = dom.element('div', [], [content, nextContainer])
+      const nextContainer = dom.element('div', 
+        pair.CorePairList.create<string, string|boolean>([
+          pair.CorePair.create('hidden', collapsed)
+        ]), []
+      )
+      const nextLine = dom.element('div', pair.CorePairList.createEmpty(), [content, nextContainer])
       dom.append(this.ccontainer, [nextLine])
       this.ccontainer = nextContainer
       this.depth++
@@ -311,12 +317,12 @@ export class VConsole {
   print (args: Array<undefined|string|Symbol|Object|number>) {
     eventloop.enqueue(() => {
       dom.append(this.ccontainer, [
-        dom.element('div', [
-          pair.CorePair.create(
-            'style',
-            `${lineStyle};padding-left:${this.depth * 10}px`
-          )
-        ], _computeLineSpans(args))
+        dom.element('div', 
+          pair.CorePairList.create<string, string|boolean>([
+            pair.CorePair.create('style', `${lineStyle};padding-left:${this.depth * 10}px`)
+          ]),
+          _computeLineSpans(args)
+        )
       ])
     })
   }
@@ -335,10 +341,12 @@ export class VConsole {
   printImg (url: string, height: number) {
     eventloop.enqueue(() => {
       dom.append(this.ccontainer, [
-        dom.element('img', [
-          pair.CorePair.create('src', url),
-          pair.CorePair.create('height', `${math.round(height * 1.5)}px`)
-        ])
+        dom.element('img', 
+          pair.CorePairList.create<string, string|boolean>([
+            pair.CorePair.create('src', url),
+            pair.CorePair.create('height', `${math.round(height * 1.5)}px`)
+          ]
+        ))
       ])
     })
   }

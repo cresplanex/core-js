@@ -98,4 +98,8 @@ export class CorePairList<L, R> {
     map<X> (f: (l: L, r: R) => X): X[] {
         return this.pairs.map(p => f(p.left, p.right))
     }
+
+    mapPair<X> (f: (pair: CorePair<L, R>) => X): X[] {
+        return this.pairs.map(f)
+    }
 }
