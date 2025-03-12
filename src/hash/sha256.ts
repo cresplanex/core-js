@@ -5,7 +5,7 @@
  * - https://web.archive.org/web/20150315061807/http://csrc.nist.gov/groups/STM/cavp/documents/shs/sha256-384-512.pdf
  */
 
-import { CoreBinary } from "../structure/binary"
+import * as binary from '../vo/binary'
 
 /**
  * @param {number} w - a 32bit uint
@@ -136,7 +136,7 @@ class Hasher {
             this._W[j] |= data[i] << ((3 - (i % 4)) * 8)
             i++
             }
-            this._W[j] |= CoreBinary.BIT8 << ((3 - (i % 4)) * 8)
+            this._W[j] |= binary.BIT8.value << ((3 - (i % 4)) * 8)
         }
         this._updateHash()
         }
@@ -151,11 +151,11 @@ class Hasher {
         }
         // Write padding of the message. See 5.1.2.
         if (!isPaddedWith1) {
-        this._W[j - (i % 4 === 0 ? 0 : 1)] |= CoreBinary.BIT8 << ((3 - (i % 4)) * 8)
+        this._W[j - (i % 4 === 0 ? 0 : 1)] |= binary.BIT8.value << ((3 - (i % 4)) * 8)
         }
         // write length of message (size in bits) as 64 bit uint
         // @todo test that this works correctly
-        this._W[14] = data.byteLength / CoreBinary.BIT30 // same as data.byteLength >>> 30 - but works on floats
+        this._W[14] = data.byteLength / binary.BIT30.value // same as data.byteLength >>> 30 - but works on floats
         this._W[15] = data.byteLength * 8
         this._updateHash()
         // correct H endianness to use big endiannes and return a Uint8Array

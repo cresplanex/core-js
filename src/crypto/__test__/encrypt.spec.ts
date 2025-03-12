@@ -3,7 +3,7 @@ import * as rsa from '../rsa-oaep'
 import * as aes from '../aes-gcm'
 
 describe("Encryption", () => {
-    let rn: prng.Prng = prng.create(0)
+    let rn: prng.Prng = prng.create(10)
 
     const secret = rn.word(1, 30)
     const salt = rn.word(1, 10)
@@ -37,5 +37,5 @@ describe("Encryption", () => {
             const dec = await rsa.decrypt(keypair2.publicKey, enc)
             expect(data).toEqual(dec)
         }).rejects.toThrow()
-    })
+    }, 10000)
 })

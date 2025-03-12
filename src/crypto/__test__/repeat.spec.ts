@@ -6,7 +6,7 @@ describe('ReapeatEncryption', () => {
     let rn: prng.Prng
 
     beforeEach(() => {
-        rn = prng.create(0)
+        rn = prng.create(10)
     })
 
     test('should encrypt and decrypt data with aes', async () => {

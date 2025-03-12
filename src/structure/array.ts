@@ -65,7 +65,7 @@ export class CoreArray<T> {
         return this.values()
     }
 
-    static from<T>(arraylike: ArrayLike<T> | Iterable<T>): T[] {
+    static from<T>(arraylike: ArrayLike<T> | Iterable<T>): Array<T> {
         return Array.from(arraylike)
     }
 

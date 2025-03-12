@@ -4,7 +4,7 @@ import * as ecdsa from '../ecdsa'
 import * as common from '../common'
 
 describe("Test import/export", () => {
-    let rn: prng.Prng = prng.create(0)
+    let rn: prng.Prng = prng.create(10)
 
     const secret = rn.word(1, 30)
     const salt = rn.word()

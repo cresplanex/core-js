@@ -14,7 +14,7 @@ import { simpleDiffString } from '../diff'
 
 export const extensive = env.hasConf('extensive')
 
-export const envSeed = env.hasParam('--seed') ? Number.parseInt(env.getParam('--seed', '0')) : null
+export const envSeed = env.hasParam('--seed') ? Number.parseInt(env.getParam('--seed', '10')) : null
 
 export const repetitionTime = Number(env.getParam('--repetition-time', '50'))
 

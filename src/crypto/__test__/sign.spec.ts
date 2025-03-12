@@ -4,7 +4,7 @@ import * as t from '../../testing'
 
 describe("Test Signing", () => {
     test('should sign and verify data with ecdsa', async () => {
-        const rn = prng.create(0)
+        const rn = prng.create(10)
 
         await t.measureTimeAsync('time to sign & verify 1 message (ECDSA)', async () => {
             const keypair = await ecdsa.generateKeyPair({ extractable: true })

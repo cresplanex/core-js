@@ -35,14 +35,14 @@ const ensureCache = (m: Uint8Array) =>
         const mBitShifted = buffer.shiftNBitsLeft(m, bit)
         const bitShifted = 1 << bit
         for (let j = 0; j < bitShifted; j++) {
-        // apply the shifted result (reducing the degree of the polynomial)
-        const msb = bitShifted | j
-        const rest = msb ^ mBitShifted[0]
-        for (let i = 0; i < byteLen; i++) {
-            // rest is already precomputed in the cache
-            cache[msb * byteLen + i] = cache[rest * byteLen + i] ^ mBitShifted[i]
-        }
-        // if (cache[(bitShifted | j) * byteLen] !== (bitShifted | j)) { error.unexpectedCase() }
+            // apply the shifted result (reducing the degree of the polynomial)
+            const msb = bitShifted | j
+            const rest = msb ^ mBitShifted[0]
+            for (let i = 0; i < byteLen; i++) {
+                // rest is already precomputed in the cache
+                cache[msb * byteLen + i] = cache[rest * byteLen + i] ^ mBitShifted[i]
+            }
+            // if (cache[(bitShifted | j) * byteLen] !== (bitShifted | j)) { error.unexpectedCase() }
         }
     }
     return cache

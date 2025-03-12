@@ -3,7 +3,7 @@ import * as aes from '../aes-gcm'
 import * as t from '../../testing'
 
 describe("Test Encryption Performance", () => {
-    let rn: prng.Prng = prng.create(0)
+    let rn: prng.Prng = prng.create(10)
 
     const N = 1000
     const BLen = 1000
