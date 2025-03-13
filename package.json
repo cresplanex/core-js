@@ -1,8 +1,11 @@
 {
-  "name": "cores-ts",
+  "name": "@cresplanex/core",
   "version": "1.0.0",
   "main": "index.js",
   "types": "index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "clean": "rm -rf dist *.d.ts */*.d.ts *.d.ts.map */*.d.ts.map",
     "types": "tsc --outDir .",

@@ -241,7 +241,5 @@ describe("CoreArray", () => {
         expect(CoreArray.unique([])).toEqual([]);
         expect(CoreArray.uniqueBy([{ el: 1 }, { el: 1 }], o => o.el)).toEqual([{ el: 1 }]);
         expect(CoreArray.uniqueBy([], o => o)).toEqual([]);
-
-        console.log(CoreArray.unfold(10, i => i ** 2));
     });
 });

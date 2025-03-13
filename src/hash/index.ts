@@ -1,5 +1,5 @@
 export {
-    SHA256Digest
+    sha256Digest
 } from './hash'
 export {
     RabinEncoder,
