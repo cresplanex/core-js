@@ -4,28 +4,120 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./async": "./dist/async.js",
-    "./broadcast": "./dist/broadcast.js",
-    "./buffer": "./dist/buffer.js",
-    "./cache": "./dist/cache.js",
-    "./crypto": "./dist/crypto.js",
-    "./csprng": "./dist/csprng.js",
-    "./diff": "./dist/diff.js",
-    "./encoding": "./dist/encode.js",
-    "./env": "./dist/env.js",
-    "./error": "./dist/error.js",
-    "./event": "./dist/event.js",
-    "./hash": "./dist/hash.js",
-    "./logging": "./dist/logging.js",
-    "./observer": "./dist/observer.js",
-    "./prng": "./dist/prng.js",
-    "./storage": "./dist/storage.js",
-    "./structure": "./dist/structure.js",
-    "./testing": "./dist/testing.js",
-    "./ui": "./dist/ui.js",
-    "./util": "./dist/utils.js",
-    "./vo": "./dist/vo.js"
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./live": {
+      "import": "./dist/async/index.js",
+      "require": "./dist/async/index.js",
+      "types": "./dist/async/index.d.ts"
+    },
+    "./broadcast": {
+      "import": "./dist/broadcast/index.js",
+      "require": "./dist/broadcast/index.js",
+      "types": "./dist/broadcast/index.d.ts"
+    },
+    "./buffer": {
+      "import": "./dist/buffer/index.js",
+      "require": "./dist/buffer/index.js",
+      "types": "./dist/buffer/index.d.ts"
+    },
+    "./cache": {
+      "import": "./dist/cache/index.js",
+      "require": "./dist/cache/index.js",
+      "types": "./dist/cache/index.d.ts"
+    },
+    "./crypto": {
+      "import": "./dist/crypto/index.js",
+      "require": "./dist/crypto/index.js",
+      "types": "./dist/crypto/index.d.ts"
+    },
+    "./csprng": {
+      "import": "./dist/csprng/index.js",
+      "require": "./dist/csprng/index.js",
+      "types": "./dist/csprng/index.d.ts"
+    },
+    "./diff": {
+      "import": "./dist/diff/index.js",
+      "require": "./dist/diff/index.js",
+      "types": "./dist/diff/index.d.ts"
+    },
+    "./encoding": {
+      "import": "./dist/encode/index.js",
+      "require": "./dist/encode/index.js",
+      "types": "./dist/encode/index.d.ts"
+    },
+    "./env": {
+      "import": "./dist/env/index.js",
+      "require": "./dist/env/index.js",
+      "types": "./dist/env/index.d.ts"
+    },
+    "./error": {
+      "import": "./dist/error/index.js",
+      "require": "./dist/error/index.js",
+      "types": "./dist/error/index.d.ts"
+    },
+    "./event": {
+      "import": "./dist/event/index.js",
+      "require": "./dist/event/index.js",
+      "types": "./dist/event/index.d.ts"
+    },
+    "./hash": {
+      "import": "./dist/hash/index.js",
+      "require": "./dist/hash/index.js",
+      "types": "./dist/hash/index.d.ts"
+    },
+    "./logging": {
+      "import": "./dist/logging/index.js",
+      "require": "./dist/logging/index.js",
+      "types": "./dist/logging/index.d.ts"
+    },
+    "./observer": {
+      "import": "./dist/observer/index.js",
+      "require": "./dist/observer/index.js",
+      "types": "./dist/observer/index.d.ts"
+    },
+    "./prng": {
+      "import": "./dist/prng/index.js",
+      "require": "./dist/prng/index.js",
+      "types": "./dist/prng/index.d.ts"
+    },
+    "./storage": {
+      "import": "./dist/storage/index.js",
+      "require": "./dist/storage/index.js",
+      "types": "./dist/storage/index.d.ts"
+    },
+    "./structure": {
+      "import": "./dist/structure/index.js",
+      "require": "./dist/structure/index.js",
+      "types": "./dist/structure/index.d.ts"
+    },
+    "./testing": {
+      "import": "./dist/testing/index.js",
+      "require": "./dist/testing/index.js",
+      "types": "./dist/testing/index.d.ts"
+    },
+    "./ui": {
+      "import": "./dist/ui/index.js",
+      "require": "./dist/ui/index.js",
+      "types": "./dist/ui/index.d.ts"
+    },
+    "./util": {
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    },
+    "./vo": {
+      "import": "./dist/vo/index.js",
+      "require": "./dist/vo/index.js",
+      "types": "./dist/vo/index.d.ts"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cresplanex/core-js.git"
   },
   "publishConfig": {
     "access": "public"
@@ -39,8 +131,22 @@
   },
   "keywords": [],
   "author": "Hayashi Kenta <k.hayashi@cresplanex.com>",
-  "license": "ISC",
+  "license": "MIT",
   "description": "",
+  "bugs": {
+    "url": "https://github.com/cresplanex/core-js/issues"
+  },
+  "homepage": "https://github.com/cresplanex/core-js#readme",
+  "standard": {
+    "ignore": [
+      "/dist",
+      "/node_modules",
+      "/docs"
+    ]
+  },
+  "engines": {
+    "node": ">=23.0.0"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "jest": "^29.7.0",

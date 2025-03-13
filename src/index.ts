@@ -1,4 +1,4 @@
-export * as async from './async' 
+export * as live from './async'
 export * as broadcast from './broadcast'
 export * as buffer from './buffer'
 export * as cache from './cache'
