@@ -1,5 +1,6 @@
-import { mathUtil, stringUtil } from "../utils";
 import { id } from "../utils/function";
+import * as mathUtil from "../utils/math";
+import * as stringUtil from "../utils/string";
 
 export class CoreTreeID {
     clock: number;
@@ -792,7 +793,7 @@ export class CoreTree<K extends CoreTreeID, V extends CoreTreeVal> {
 }
 
 function colorRed(str: string): string {
-    return `\x1b[31m${str}\x1b[0m`
+    return `\x1b[31m${str}\x1b[0m`;
 }
 
 function stringWidth(str: string): number {

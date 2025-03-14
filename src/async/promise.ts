@@ -1,6 +1,6 @@
 import * as time from '../utils/time'
 
-type PromiseResolve<T> = (result?: T | PromiseLike<T>) => void
+type PromiseResolve<T> = (result: T | PromiseLike<T>) => void
 
 export const create = <T>(f: (resolve: PromiseResolve<T>, reject: (reason: Error) => void) => any) =>
     new Promise(f) 

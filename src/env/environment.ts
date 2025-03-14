@@ -4,7 +4,7 @@
  * @module environment
  */
 
-import { CoreMap } from "../structure";
+import { CoreMap } from "../structure/map";
 import * as stringUtils from '../utils/string';
 import * as nullUtils from '../utils/null';
 import * as storage from '../storage'
