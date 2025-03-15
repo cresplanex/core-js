@@ -1,6 +1,7 @@
 import * as math from './math';
 import { getRandomValues } from '../csprng';
 import { binary } from '../vo';
+import { IDValueFactory } from '../vo/id/id';
 
 let _uint32Func: () => number = Math.random
 if (crypto) {
@@ -23,3 +24,13 @@ export const uint53 = _uint53Func
 
 export const oneOf = <T>(arr: T[]): T =>
     arr[math.floor(rand() * arr.length)]
+
+export const uuidv4 = (): string =>
+    IDValueFactory.create(undefined, {
+        sortable: false,
+    }).value
+
+export const uuidv7 = (): string => 
+    IDValueFactory.create(undefined, {
+        sortable: true,
+    }).value
