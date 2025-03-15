@@ -18,7 +18,7 @@ describe('Observable', () => {
     test('should call the listener registered with "on"', () => {
         const mockCallback = jest.fn();
         observable.on('eventA', mockCallback);
-        observable.emit('eventA', 42);
+        observable.emit('eventA', [42]);
         expect(mockCallback).toHaveBeenCalledWith(42);
         expect(mockCallback).toHaveBeenCalledTimes(1);
     });
@@ -27,8 +27,8 @@ describe('Observable', () => {
     test('should call the "once" listener only once', () => {
         const mockCallback = jest.fn();
         observable.once('eventA', mockCallback);
-        observable.emit('eventA', 100);
-        observable.emit('eventA', 200);
+        observable.emit('eventA', [100]);
+        observable.emit('eventA', [200]);
         expect(mockCallback).toHaveBeenCalledWith(100);
         expect(mockCallback).toHaveBeenCalledTimes(1);
     });
@@ -37,13 +37,13 @@ describe('Observable', () => {
     test('should remove a listener with "off"', () => {
         const mockCallback = jest.fn();
         observable.on('eventB', mockCallback);
-        observable.emit('eventB', 'hello');
+        observable.emit('eventB', ['hello']);
         expect(mockCallback).toHaveBeenCalledWith('hello');
         expect(mockCallback).toHaveBeenCalledTimes(1);
 
         // Remove the listener and verify it is not called again
         observable.off('eventB', mockCallback);
-        observable.emit('eventB', 'world');
+        observable.emit('eventB', ['world']);
         expect(mockCallback).toHaveBeenCalledTimes(1);
     });
 
@@ -63,8 +63,8 @@ describe('Observable', () => {
         observable.on('eventB', mockCallbackB);
 
         observable.destroy();
-        observable.emit('eventA', 10);
-        observable.emit('eventB', 'test');
+        observable.emit('eventA', [10]);
+        observable.emit('eventB', ['test']);
 
         expect(mockCallbackA).not.toHaveBeenCalled();
         expect(mockCallbackB).not.toHaveBeenCalled();
