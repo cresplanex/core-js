@@ -1,11 +1,11 @@
 export class CoreMap<K, V> {
     private _values: Map<K, V>;
 
-    constructor(entries?: Iterable<[K, V]>) {
+    constructor(entries?: Iterable<readonly [K, V]>) {
         this._values = entries ? new Map(entries) : new Map()
     }
 
-    static create<K, V>(entries?: Iterable<[K, V]>): CoreMap<K, V> {
+    static create<K, V>(entries?: Iterable<readonly [K, V]>): CoreMap<K, V> {
         return new CoreMap(entries)
     }
 
