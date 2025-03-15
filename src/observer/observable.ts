@@ -61,7 +61,7 @@ export class Observable<EVENTS extends {[key in keyof EVENTS]: (...args: any) =>
      * @param {NAME} name The event name.
      * @param {Parameters<EVENTS[NAME]>} args The arguments that are applied to the event listener.
      */
-    emit <NAME extends keyof EVENTS & string> (name: NAME, ...args: Parameters<EVENTS[NAME]>): void {
+    emit <NAME extends keyof EVENTS & string> (name: NAME, args: Parameters<EVENTS[NAME]>): void {
         // copy all listeners to an array first to make sure that no event is emitted to listeners that are subscribed while the event handler is called.
         return CoreArray.from(
             ((this._observers.get(name) as CoreSet<EVENTS[keyof EVENTS]>) 
