@@ -34,6 +34,10 @@ export class CoreMap<K, V> {
         return this._values.has(key)
     }
 
+    entries(): IterableIterator<[K, V]> {
+        return this._values.entries()
+    }
+
     clear() {
         this._values.clear()
     }
